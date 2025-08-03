@@ -102,7 +102,80 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /declare\s+clearTimeout/,
         /declare\s+clearInterval/,
         /declare\s+setImmediate/,
-        /declare\s+clearImmediate/
+        /declare\s+clearImmediate/,
+        /:\s*RouteRecordRaw/,
+        /:\s*RouteRecordRaw\[\]/,
+        /:\s*createApp/,
+        /:\s*createPinia/,
+        /:\s*createRouter/,
+        /:\s*createWebHistory/,
+        /:\s*App/,
+        /:\s*Vue/,
+        /:\s*Pinia/,
+        /:\s*Router/,
+        /:\s*History/,
+        /:\s*Component/,
+        /:\s*Ref/,
+        /:\s*Reactive/,
+        /:\s*Computed/,
+        /:\s*Watch/,
+        /:\s*OnMounted/,
+        /:\s*OnUnmounted/,
+        /:\s*OnUpdated/,
+        /:\s*OnBeforeMount/,
+        /:\s*OnBeforeUnmount/,
+        /:\s*OnBeforeUpdate/,
+        /:\s*OnErrorCaptured/,
+        /:\s*OnRenderTracked/,
+        /:\s*OnRenderTriggered/,
+        /:\s*OnActivated/,
+        /:\s*OnDeactivated/,
+        /:\s*OnServerPrefetch/,
+        /:\s*DefineComponent/,
+        /:\s*ComponentPublicInstance/,
+        /:\s*ComponentCustomProperties/,
+        /:\s*ComponentCustomProps/,
+        /:\s*VNode/,
+        /:\s*VNodeChild/,
+        /:\s*VNodeArrayChildren/,
+        /:\s*VNodeNormalizedChildren/,
+        /:\s*VNodeRef/,
+        /:\s*VNodeProps/,
+        /:\s*VNodeData/,
+        /:\s*VNodeDirective/,
+        /:\s*VNodeHook/,
+        /:\s*VNodeTransition/,
+        /:\s*VNodeTransitionGroup/,
+        /:\s*VNodeKeepAlive/,
+        /:\s*VNodeSuspense/,
+        /:\s*VNodeTeleport/,
+        /:\s*VNodeFragment/,
+        /:\s*VNodeComment/,
+        /:\s*VNodeText/,
+        /:\s*VNodeStatic/,
+        /:\s*VNodeClone/,
+        /:\s*VNodeSlot/,
+        /:\s*VNodeSlotOutlet/,
+        /:\s*VNodeSlotFragment/,
+        /:\s*VNodeSlotText/,
+        /:\s*VNodeSlotComment/,
+        /:\s*VNodeSlotStatic/,
+        /:\s*VNodeSlotClone/,
+        /:\s*VNodeSlotTeleport/,
+        /:\s*VNodeSlotSuspense/,
+        /:\s*VNodeSlotKeepAlive/,
+        /:\s*VNodeSlotTransition/,
+        /:\s*VNodeSlotTransitionGroup/,
+        /:\s*VNodeSlotFragment/,
+        /:\s*VNodeSlotText/,
+        /:\s*VNodeSlotComment/,
+        /:\s*VNodeSlotStatic/,
+        /:\s*VNodeSlotClone/,
+        /:\s*VNodeSlotTeleport/,
+        /:\s*VNodeSlotSuspense/,
+        /:\s*VNodeSlotKeepAlive/,
+        /:\s*VNodeSlotTransition/,
+        /:\s*VNodeSlotTransitionGroup/
     ],
     'python': [
         /def\s+\w+\s*\(/,
@@ -552,7 +625,39 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /@external_resource/,
         /@compile\s+\w+/,
         /@deprecated/,
-        /@since\s+\d+\.\d+/
+        /@since\s+\d+\.\d+/,
+        /defmodule\s+\w+\s+do/,
+        /def\s+\w+\s*\([^)]*\)\s+do/,
+        /defp\s+\w+\s*\([^)]*\)\s+do/,
+        /end\s*$/,
+        /do\s*$/,
+        /else\s+do/,
+        /rescue\s+do/,
+        /after\s+do/,
+        /catch\s+do/,
+        /defguard\s+\w+/,
+        /defmacro\s+\w+/,
+        /defmacrop\s+\w+/,
+        /defdelegate\s+\w+/,
+        /defoverridable\s+\[/,
+        /defexception\s+\w+/,
+        /defimpl\s+\w+\s+for\s+\w+/,
+        /defprotocol\s+\w+\s+do/,
+        /defcallback\s+\w+/,
+        /defoptional\s+\w+/,
+        /@impl\s+\w+/,
+        /@derive\s+\[/,
+        /@behaviour\s+\w+/,
+        /@callback\s+\w+\s*\([^)]*\)\s*::/,
+        /@spec\s+\w+\s*\([^)]*\)\s*::/,
+        /@type\s+\w+\s*::/,
+        /@opaque\s+\w+\s*::/,
+        /@macrocallback\s+\w+/,
+        /@optional_callbacks\s+\[/,
+        /@compile\s+\w+/,
+        /@external_resource\s+['"][^'"]*['"]/,
+        /@deprecated\s+['"][^'"]*['"]/,
+        /@since\s+\d+\.\d+\s+['"][^'"]*['"]/
     ],
     'haskell': [
         /module\s+\w+/,
@@ -785,10 +890,24 @@ export function detectLanguage(code: string): ProgrammingLanguage {
 
     // Приоритет для TypeScript - если есть TypeScript специфичные паттерны
     if (scores['typescript'] > 0) {
-        const typescriptPatterns = ['interface', 'type', 'import type', 'export type', 'export interface', 'export enum', 'declare', 'as', 'implements', 'extends', 'readonly', 'private', 'public', 'protected'];
+        const typescriptPatterns = ['interface', 'type', 'import type', 'export type', 'export interface', 'export enum', 'declare', 'as', 'implements', 'extends', 'readonly', 'private', 'public', 'protected', 'RouteRecordRaw', 'createApp', 'createPinia', 'createRouter', 'createWebHistory'];
         const hasTypeScriptPatterns = typescriptPatterns.some(pattern => code.includes(pattern));
         if (hasTypeScriptPatterns) {
-            scores['typescript'] += 40; // Высокий приоритет для TypeScript
+            scores['typescript'] += 60; // Очень высокий приоритет для TypeScript
+            // Уменьшаем вес Elixir если есть TypeScript паттерны
+            if (scores['elixir'] > 0) {
+                scores['elixir'] = Math.max(0, scores['elixir'] - 30);
+            }
+        }
+    }
+
+    // Специальная проверка для Vue/TypeScript кода
+    if (code.includes('import') && code.includes('from') && (code.includes('vue') || code.includes('pinia') || code.includes('router'))) {
+        scores['typescript'] += 50;
+        scores['javascript'] += 30;
+        // Уменьшаем вес Elixir для Vue/TypeScript кода
+        if (scores['elixir'] > 0) {
+            scores['elixir'] = Math.max(0, scores['elixir'] - 40);
         }
     }
 
