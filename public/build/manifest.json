@@ -1,0 +1,58 @@
+{
+  "_index-BG5Ynpes.js": {
+    "file": "assets/index-BG5Ynpes.js",
+    "name": "index"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-BAkhZJHB.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.ts": {
+    "file": "assets/app-3qNf4nrR.js",
+    "name": "app",
+    "src": "resources/js/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/Home.vue",
+      "resources/js/pages/CodeView.vue",
+      "resources/js/pages/CodeCreate.vue"
+    ],
+    "css": [
+      "assets/app-tn0RQdqM.css"
+    ]
+  },
+  "resources/js/pages/CodeCreate.vue": {
+    "file": "assets/CodeCreate-GYW8VGa-.js",
+    "name": "CodeCreate",
+    "src": "resources/js/pages/CodeCreate.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_index-BG5Ynpes.js"
+    ]
+  },
+  "resources/js/pages/CodeView.vue": {
+    "file": "assets/CodeView-l_MnWo3J.js",
+    "name": "CodeView",
+    "src": "resources/js/pages/CodeView.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_index-BG5Ynpes.js"
+    ]
+  },
+  "resources/js/pages/Home.vue": {
+    "file": "assets/Home-M5PrXZ6y.js",
+    "name": "Home",
+    "src": "resources/js/pages/Home.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_index-BG5Ynpes.js"
+    ]
+  }
+}

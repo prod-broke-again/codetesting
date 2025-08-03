@@ -61,6 +61,7 @@ export interface CreateSnippetForm {
 
 // Типы для языков программирования
 export type ProgrammingLanguage = 
+    // Основные языки
     | 'php' 
     | 'javascript' 
     | 'python' 
@@ -72,7 +73,31 @@ export type ProgrammingLanguage =
     | 'typescript'
     | 'html'
     | 'css'
-    | 'sql';
+    | 'sql'
+    // Смешанные типы
+    | 'php-html'
+    | 'vue'
+    | 'blade'
+    | 'jsx'
+    | 'tsx'
+    | 'html-css'
+    | 'html-js'
+    | 'php-blade'
+    // Дополнительные языки
+    | 'ruby'
+    | 'swift'
+    | 'kotlin'
+    | 'scala'
+    | 'dart'
+    | 'elixir'
+    | 'haskell'
+    | 'clojure'
+    | 'bash'
+    | 'powershell'
+    | 'yaml'
+    | 'json'
+    | 'xml'
+    | 'markdown';
 
 // Типы для тем оформления
 export type CodeTheme = 
@@ -82,4 +107,68 @@ export type CodeTheme =
     | 'github'
     | 'dracula'
     | 'solarized-dark'
-    | 'solarized-light'; 
+    | 'solarized-light'
+    | 'nord'
+    | 'material'
+    | 'one-dark'
+    | 'one-light'
+    | 'tokyo-night'
+    | 'catppuccin';
+
+// Константы для языков с описаниями
+export const LANGUAGE_OPTIONS: Record<ProgrammingLanguage, string> = {
+    // Основные языки
+    'php': 'PHP',
+    'javascript': 'JavaScript',
+    'python': 'Python',
+    'java': 'Java',
+    'csharp': 'C#',
+    'cpp': 'C++',
+    'go': 'Go',
+    'rust': 'Rust',
+    'typescript': 'TypeScript',
+    'html': 'HTML',
+    'css': 'CSS',
+    'sql': 'SQL',
+    // Смешанные типы
+    'php-html': 'PHP + HTML',
+    'vue': 'Vue.js',
+    'blade': 'Laravel Blade',
+    'jsx': 'JSX (React)',
+    'tsx': 'TSX (React + TypeScript)',
+    'html-css': 'HTML + CSS',
+    'html-js': 'HTML + JavaScript',
+    'php-blade': 'PHP + Blade',
+    // Дополнительные языки
+    'ruby': 'Ruby',
+    'swift': 'Swift',
+    'kotlin': 'Kotlin',
+    'scala': 'Scala',
+    'dart': 'Dart',
+    'elixir': 'Elixir',
+    'haskell': 'Haskell',
+    'clojure': 'Clojure',
+    'bash': 'Bash',
+    'powershell': 'PowerShell',
+    'yaml': 'YAML',
+    'json': 'JSON',
+    'xml': 'XML',
+    'markdown': 'Markdown'
+};
+
+// Константы для тем с описаниями
+export const THEME_OPTIONS: Record<CodeTheme, string> = {
+    'vs-dark': 'VS Code Dark',
+    'vs-light': 'VS Code Light',
+    'monokai': 'Monokai',
+    'github': 'GitHub',
+    'dracula': 'Dracula',
+    'solarized-dark': 'Solarized Dark',
+    'solarized-light': 'Solarized Light',
+    'nord': 'Nord',
+    'material': 'Material',
+    'one-dark': 'One Dark',
+    'one-light': 'One Light',
+    'tokyo-night': 'Tokyo Night',
+    'catppuccin': 'Catppuccin'
+}; 

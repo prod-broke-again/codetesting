@@ -23,18 +23,21 @@
                         v-model="form.language"
                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="php">PHP</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="typescript">TypeScript</option>
-                        <option value="python">Python</option>
-                        <option value="java">Java</option>
-                        <option value="csharp">C#</option>
-                        <option value="cpp">C++</option>
-                        <option value="go">Go</option>
-                        <option value="rust">Rust</option>
-                        <option value="html">HTML</option>
-                        <option value="css">CSS</option>
-                        <option value="sql">SQL</option>
+                        <optgroup label="Основные языки">
+                            <option v-for="(name, lang) in basicLanguages" :key="lang" :value="lang">
+                                {{ name }}
+                            </option>
+                        </optgroup>
+                        <optgroup label="Смешанные типы">
+                            <option v-for="(name, lang) in mixedLanguages" :key="lang" :value="lang">
+                                {{ name }}
+                            </option>
+                        </optgroup>
+                        <optgroup label="Дополнительные языки">
+                            <option v-for="(name, lang) in additionalLanguages" :key="lang" :value="lang">
+                                {{ name }}
+                            </option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -47,13 +50,9 @@
                         v-model="form.theme"
                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="vs-dark">Dark (VS Code)</option>
-                        <option value="vs-light">Light (VS Code)</option>
-                        <option value="monokai">Monokai</option>
-                        <option value="github">GitHub</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="solarized-dark">Solarized Dark</option>
-                        <option value="solarized-light">Solarized Light</option>
+                        <option v-for="(name, theme) in themeOptions" :key="theme" :value="theme">
+                            {{ name }}
+                        </option>
                     </select>
                 </div>
 
@@ -86,9 +85,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
+import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 
 const router = useRouter();
 const isLoading = ref<boolean>(false);
@@ -98,6 +98,30 @@ const form = reactive<CreateSnippetForm>({
     language: 'php' as ProgrammingLanguage,
     theme: 'vs-dark' as CodeTheme
 });
+
+// Группировка языков для лучшего UX
+const basicLanguages = computed(() => {
+    const basic = ['php', 'javascript', 'python', 'java', 'csharp', 'cpp', 'go', 'rust', 'typescript', 'html', 'css', 'sql'];
+    return Object.fromEntries(
+        Object.entries(LANGUAGE_OPTIONS).filter(([key]) => basic.includes(key))
+    );
+});
+
+const mixedLanguages = computed(() => {
+    const mixed = ['php-html', 'vue', 'blade', 'jsx', 'tsx', 'html-css', 'html-js', 'php-blade'];
+    return Object.fromEntries(
+        Object.entries(LANGUAGE_OPTIONS).filter(([key]) => mixed.includes(key))
+    );
+});
+
+const additionalLanguages = computed(() => {
+    const additional = ['ruby', 'swift', 'kotlin', 'scala', 'dart', 'elixir', 'haskell', 'clojure', 'bash', 'powershell', 'yaml', 'json', 'xml', 'markdown'];
+    return Object.fromEntries(
+        Object.entries(LANGUAGE_OPTIONS).filter(([key]) => additional.includes(key))
+    );
+});
+
+const themeOptions = computed(() => THEME_OPTIONS);
 
 const createSnippet = async (): Promise<void> => {
     if (!form.content.trim()) {

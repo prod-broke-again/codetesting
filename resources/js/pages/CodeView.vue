@@ -89,6 +89,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import type { CodeSnippet } from '@/types';
+import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 
 const route = useRoute();
 const loading = ref<boolean>(true);
@@ -134,34 +135,11 @@ const copyUrl = async (): Promise<void> => {
 };
 
 const getLanguageName = (language: string): string => {
-    const languages: Record<string, string> = {
-        'php': 'PHP',
-        'javascript': 'JavaScript',
-        'typescript': 'TypeScript',
-        'python': 'Python',
-        'java': 'Java',
-        'csharp': 'C#',
-        'cpp': 'C++',
-        'go': 'Go',
-        'rust': 'Rust',
-        'html': 'HTML',
-        'css': 'CSS',
-        'sql': 'SQL'
-    };
-    return languages[language] || language;
+    return LANGUAGE_OPTIONS[language as keyof typeof LANGUAGE_OPTIONS] || language;
 };
 
 const getThemeName = (theme: string): string => {
-    const themes: Record<string, string> = {
-        'vs-dark': 'Dark (VS Code)',
-        'vs-light': 'Light (VS Code)',
-        'monokai': 'Monokai',
-        'github': 'GitHub',
-        'dracula': 'Dracula',
-        'solarized-dark': 'Solarized Dark',
-        'solarized-light': 'Solarized Light'
-    };
-    return themes[theme] || theme;
+    return THEME_OPTIONS[theme as keyof typeof THEME_OPTIONS] || theme;
 };
 
 const formatDate = (dateString: string): string => {
