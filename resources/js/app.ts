@@ -15,5 +15,11 @@ createInertiaApp({
         
         app.use(plugin);
         app.mount(el);
+        
+        // Инициализируем тему после монтирования приложения
+        import('./stores/theme').then(({ useThemeStore }) => {
+            const themeStore = useThemeStore();
+            themeStore.initTheme();
+        });
     },
 }); 

@@ -3,11 +3,11 @@
         <button
             @click="toggleTheme"
             class="relative inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-            :title="currentTheme.name"
+            :title="themeStore.currentThemeConfig.name"
         >
             <!-- Солнце (светлая тема) -->
             <svg
-                v-if="currentTheme.key === 'light'"
+                v-if="themeStore.currentTheme === 'light'"
                 class="w-5 h-5 text-yellow-500"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -17,7 +17,7 @@
             
             <!-- Луна (темная тема) -->
             <svg
-                v-else-if="currentTheme.key === 'dark'"
+                v-else-if="themeStore.currentTheme === 'dark'"
                 class="w-5 h-5 text-blue-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -27,7 +27,7 @@
             
             <!-- Космос (космическая тема) -->
             <svg
-                v-else-if="currentTheme.key === 'space'"
+                v-else-if="themeStore.currentTheme === 'space'"
                 class="w-5 h-5 text-purple-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -37,7 +37,7 @@
             
             <!-- Огонь (огненная тема) -->
             <svg
-                v-else-if="currentTheme.key === 'fire'"
+                v-else-if="themeStore.currentTheme === 'fire'"
                 class="w-5 h-5 text-orange-500"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -53,14 +53,14 @@
         >
             <div class="py-1">
                 <button
-                    v-for="theme in themes"
-                    :key="theme.key"
-                    @click="selectTheme(theme)"
+                    v-for="(theme, key) in themeStore.themes"
+                    :key="key"
+                    @click="selectTheme(key)"
                     class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3 transition-colors duration-150"
-                    :class="{ 'bg-blue-50 dark:bg-blue-900/20': currentTheme.key === theme.key }"
+                    :class="{ 'bg-blue-50 dark:bg-blue-900/20': themeStore.currentTheme === key }"
                 >
-                    <div class="w-4 h-4 rounded-full" :class="theme.color"></div>
-                    <span class="text-sm font-medium" :class="theme.textColor">{{ theme.name }}</span>
+                    <div class="w-4 h-4 rounded-full" :style="{ backgroundColor: theme.colors.primary }"></div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ theme.name }}</span>
                 </button>
             </div>
         </div>
@@ -68,68 +68,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useThemeStore } from '@/stores/theme';
 
-interface Theme {
-    key: string;
-    name: string;
-    color: string;
-    textColor: string;
-}
-
-const themes: Theme[] = [
-    {
-        key: 'light',
-        name: 'Светлая',
-        color: 'bg-yellow-400',
-        textColor: 'text-gray-900 dark:text-gray-100'
-    },
-    {
-        key: 'dark',
-        name: 'Темная',
-        color: 'bg-blue-600',
-        textColor: 'text-gray-900 dark:text-gray-100'
-    },
-    {
-        key: 'space',
-        name: 'Космос',
-        color: 'bg-purple-600',
-        textColor: 'text-gray-900 dark:text-gray-100'
-    },
-    {
-        key: 'fire',
-        name: 'Огонь',
-        color: 'bg-orange-500',
-        textColor: 'text-gray-900 dark:text-gray-100'
-    }
-];
-
-const currentTheme = ref<Theme>(themes[0]);
+const themeStore = useThemeStore();
 const isOpen = ref(false);
 
 const toggleTheme = () => {
+    console.log('Toggle theme clicked, current theme:', themeStore.currentTheme);
     isOpen.value = !isOpen.value;
 };
 
-const selectTheme = (theme: Theme) => {
-    currentTheme.value = theme;
+const selectTheme = (theme: string) => {
+    console.log('Selecting theme:', theme);
+    themeStore.setTheme(theme as any);
     isOpen.value = false;
-    
-    // Удаляем все существующие классы тем
-    document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-space', 'theme-fire');
-    
-    // Применяем новую тему
-    document.documentElement.classList.add(`theme-${theme.key}`);
-    
-    // Сохраняем в localStorage
-    localStorage.setItem('theme', theme.key);
-    
-    // Добавляем класс dark для Tailwind, если это темная тема
-    if (theme.key === 'dark' || theme.key === 'space' || theme.key === 'fire') {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
 };
 
 const handleClickOutside = (event: Event) => {
@@ -139,11 +92,18 @@ const handleClickOutside = (event: Event) => {
     }
 };
 
+// Следим за изменениями темы
+watch(() => themeStore.currentTheme, (newTheme) => {
+    console.log('Theme changed to:', newTheme);
+});
+
 onMounted(() => {
-    // Загружаем сохраненную тему
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    const theme = themes.find(t => t.key === savedTheme) || themes[0];
-    selectTheme(theme);
+    console.log('ThemeToggle mounted, current theme:', themeStore.currentTheme);
+    
+    // Инициализируем тему если она еще не инициализирована
+    if (!themeStore.currentTheme) {
+        themeStore.initTheme();
+    }
     
     // Добавляем обработчик клика вне компонента
     document.addEventListener('click', handleClickOutside);

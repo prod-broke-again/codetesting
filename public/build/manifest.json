@@ -1,13 +1,14 @@
 {
-  "_Navigation.vue_vue_type_script_setup_true_lang-DA1jB0-T.js": {
-    "file": "assets/Navigation.vue_vue_type_script_setup_true_lang-DA1jB0-T.js",
+  "_Navigation.vue_vue_type_script_setup_true_lang-BMFIG1_2.js": {
+    "file": "assets/Navigation.vue_vue_type_script_setup_true_lang-BMFIG1_2.js",
     "name": "Navigation.vue_vue_type_script_setup_true_lang",
     "imports": [
-      "resources/js/app.ts"
+      "resources/js/app.ts",
+      "resources/js/stores/theme.ts"
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-BhmTAvq1.css",
+    "file": "assets/app-D9mzoBZB.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -15,18 +16,19 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-BJ9cWT1y.js",
+    "file": "assets/app-BTqtsRpg.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/pages/Auth/Auth.vue",
       "resources/js/pages/CodeView.vue",
-      "resources/js/pages/Home.vue"
+      "resources/js/pages/Home.vue",
+      "resources/js/stores/theme.ts"
     ]
   },
   "resources/js/pages/Auth/Auth.vue": {
-    "file": "assets/Auth-BsQThi31.js",
+    "file": "assets/Auth-D-fPyd6f.js",
     "name": "Auth",
     "src": "resources/js/pages/Auth/Auth.vue",
     "isDynamicEntry": true,
@@ -35,23 +37,34 @@
     ]
   },
   "resources/js/pages/CodeView.vue": {
-    "file": "assets/CodeView-C04nPmAp.js",
+    "file": "assets/CodeView-DnxNvtmG.js",
     "name": "CodeView",
     "src": "resources/js/pages/CodeView.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Navigation.vue_vue_type_script_setup_true_lang-DA1jB0-T.js",
-      "resources/js/app.ts"
+      "_Navigation.vue_vue_type_script_setup_true_lang-BMFIG1_2.js",
+      "resources/js/app.ts",
+      "resources/js/stores/theme.ts"
     ]
   },
   "resources/js/pages/Home.vue": {
-    "file": "assets/Home-hce1_Q0y.js",
+    "file": "assets/Home-Biu-5Yyk.js",
     "name": "Home",
     "src": "resources/js/pages/Home.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_Navigation.vue_vue_type_script_setup_true_lang-DA1jB0-T.js"
+      "_Navigation.vue_vue_type_script_setup_true_lang-BMFIG1_2.js",
+      "resources/js/stores/theme.ts"
+    ]
+  },
+  "resources/js/stores/theme.ts": {
+    "file": "assets/theme-CV0mtZYS.js",
+    "name": "theme",
+    "src": "resources/js/stores/theme.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
     ]
   }
 }
