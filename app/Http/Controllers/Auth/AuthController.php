@@ -6,81 +6,65 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function __construct(
-        private AuthService $authService
-    ) {}
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
 
     /**
-     * Показать форму входа
+     * Показать единую страницу авторизации
      */
-    public function showLoginForm(): Response
+    public function showAuth()
     {
-        return Inertia::render('Auth/Login', [
-            'title' => 'Вход в систему',
-            'description' => 'Войдите в свой аккаунт для доступа к премиум функциям'
+        return Inertia::render('Auth/Auth', [
+            'title' => 'Авторизация',
+            'description' => 'Войдите в систему или создайте новый аккаунт'
         ]);
     }
 
     /**
-     * Показать форму регистрации
+     * Обработка входа
      */
-    public function showRegisterForm(): Response
-    {
-        return Inertia::render('Auth/Register', [
-            'title' => 'Регистрация',
-            'description' => 'Создайте аккаунт для доступа к премиум функциям'
-        ]);
-    }
-
-    /**
-     * Войти в систему
-     */
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request)
     {
         try {
-            $credentials = $request->only(['email', 'password']);
-            $remember = $request->boolean('remember', false);
-
+            $credentials = $request->validated();
+            
             if ($this->authService->attemptLogin($credentials)) {
                 $user = $this->authService->getCurrentUser();
                 
-                // Связываем fingerprint если есть
-                $fingerprintHash = $request->header('X-Fingerprint');
-                if ($fingerprintHash && $user) {
-                    $this->authService->linkFingerprintToUser($fingerprintHash, $user);
+                // Связываем fingerprint с пользователем
+                if ($fingerprint = $request->header('X-Fingerprint')) {
+                    $this->authService->linkFingerprintToUser($fingerprint, $user);
                 }
-
+                
                 return response()->json([
                     'success' => true,
-                    'message' => 'Вход выполнен успешно!',
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'avatar' => $user->avatar,
-                    ]
+                    'message' => 'Вы успешно вошли в систему',
+                    'user' => $user
                 ]);
             }
-
+            
+            throw ValidationException::withMessages([
+                'email' => ['Неверные учетные данные.']
+            ]);
+            
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Неверный email или пароль'
-            ], 401);
-
+                'message' => 'Неверные учетные данные',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            Log::error('Ошибка входа в систему', [
-                'error' => $e->getMessage(),
-                'email' => $request->email
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Ошибка входа в систему'
@@ -89,64 +73,57 @@ class AuthController extends Controller
     }
 
     /**
-     * Зарегистрироваться
+     * Обработка регистрации
      */
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         try {
-            $user = $this->authService->createUser($request->validated());
-            $this->authService->login($user);
-
-            // Связываем fingerprint если есть
-            $fingerprintHash = $request->header('X-Fingerprint');
-            if ($fingerprintHash) {
-                $this->authService->linkFingerprintToUser($fingerprintHash, $user);
+            $data = $request->validated();
+            
+            // Проверяем, не существует ли уже пользователь с таким email
+            if ($this->authService->getCurrentUser() || \App\Models\User::where('email', $data['email'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Пользователь с таким email уже существует'
+                ], 422);
             }
-
+            
+            $user = $this->authService->createUser($data);
+            $this->authService->login($user);
+            
+            // Связываем fingerprint с пользователем
+            if ($fingerprint = $request->header('X-Fingerprint')) {
+                $this->authService->linkFingerprintToUser($fingerprint, $user);
+            }
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Регистрация выполнена успешно!',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'avatar' => $user->avatar,
-                ]
-            ], 201);
-
-        } catch (\Exception $e) {
-            Log::error('Ошибка регистрации', [
-                'error' => $e->getMessage(),
-                'email' => $request->email
+                'message' => 'Аккаунт успешно создан',
+                'user' => $user
             ]);
-
+            
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ошибка регистрации'
+                'message' => 'Ошибка создания аккаунта'
             ], 500);
         }
     }
 
     /**
-     * Выйти из системы
+     * Выход из системы
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request)
     {
         try {
             $this->authService->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Выход выполнен успешно!'
+                'message' => 'Вы успешно вышли из системы'
             ]);
-
+            
         } catch (\Exception $e) {
-            Log::error('Ошибка выхода из системы', [
-                'error' => $e->getMessage()
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Ошибка выхода из системы'
@@ -155,28 +132,22 @@ class AuthController extends Controller
     }
 
     /**
-     * Получить информацию о текущем пользователе
+     * Получить текущего пользователя
      */
-    public function me(): JsonResponse
+    public function me()
     {
         $user = $this->authService->getCurrentUser();
-
+        
         if (!$user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Пользователь не авторизован'
             ], 401);
         }
-
+        
         return response()->json([
             'success' => true,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar' => $user->avatar,
-                'has_premium' => $user->hasPremiumAccess(),
-            ]
+            'user' => $user
         ]);
     }
 }

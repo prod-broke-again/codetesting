@@ -54,13 +54,13 @@
                     <!-- Кнопки авторизации -->
                     <div v-if="!isAuthenticated" class="flex items-center space-x-2">
                         <router-link
-                            to="/auth/login"
+                            to="/auth"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                         >
                             Войти
                         </router-link>
                         <router-link
-                            to="/auth/register"
+                            to="/auth"
                             class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                         >
                             Регистрация

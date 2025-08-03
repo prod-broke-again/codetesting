@@ -6,38 +6,40 @@ use App\Http\Controllers\CodeController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialiteController;
 
-// Главная страница - создание сниппета
-Route::get('/', [HomeController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+// Главная страница
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Создание сниппета
+Route::get('/create', [CodeController::class, 'create'])->name('code.create');
 
 // Просмотр сниппета
-Route::get('/code/{hash}', [CodeController::class, 'show']);
+Route::get('/code/{hash}', [CodeController::class, 'show'])->name('code.show');
 
-// Создание сниппета (отдельная страница)
-Route::get('/create', [CodeController::class, 'create']);
+// Авторизация (единая страница)
+Route::get('/auth', [AuthController::class, 'showAuth'])->name('auth.show');
 
-// Маршруты авторизации
-Route::prefix('auth')->group(function () {
-    // Формы авторизации
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    
-    // API авторизации
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
-    
-    // Socialite маршруты
-    Route::get('/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
-    Route::get('/github', [SocialiteController::class, 'redirectToGithub'])->name('auth.github');
-    Route::get('/github/callback', [SocialiteController::class, 'handleGithubCallback']);
-    
-    // Получение связанных сниппетов
-    Route::get('/related-snippets', [SocialiteController::class, 'getRelatedSnippets']);
-});
+// Обработка форм авторизации
+Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-// Защищенные маршруты (требуют авторизации)
-Route::middleware('auth')->group(function () {
-    // TODO: Добавить защищенные маршруты для премиум функций
+// Socialite маршруты
+Route::get('/auth/{provider}', [SocialiteController::class, 'redirect'])->name('auth.socialite.redirect');
+Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('auth.socialite.callback');
+
+// API маршруты для сниппетов
+Route::prefix('api')->group(function () {
+    Route::post('/codes', [CodeController::class, 'store'])->name('api.codes.store');
+    Route::get('/codes/{hash}', [CodeController::class, 'show'])->name('api.codes.show');
 });
