@@ -46,7 +46,63 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /readonly\s+/,
         /private\s+\w+/,
         /public\s+\w+/,
-        /protected\s+\w+/
+        /protected\s+\w+/,
+        /import\s+type/,
+        /export\s+type/,
+        /export\s+interface/,
+        /export\s+enum/,
+        /export\s+const/,
+        /export\s+function/,
+        /export\s+class/,
+        /export\s+default/,
+        /export\s*{/,
+        /export\s*\*/,
+        /import\s*{/,
+        /import\s*\*/,
+        /import\s+['"][^'"]*['"]/,
+        /from\s+['"][^'"]*['"]/,
+        /declare\s+module/,
+        /declare\s+namespace/,
+        /declare\s+function/,
+        /declare\s+const/,
+        /declare\s+class/,
+        /declare\s+interface/,
+        /declare\s+type/,
+        /declare\s+enum/,
+        /declare\s+var/,
+        /declare\s+let/,
+        /declare\s+const/,
+        /declare\s+global/,
+        /declare\s+export/,
+        /declare\s+import/,
+        /declare\s+require/,
+        /declare\s+module\.exports/,
+        /declare\s+exports/,
+        /declare\s+__dirname/,
+        /declare\s+__filename/,
+        /declare\s+process/,
+        /declare\s+Buffer/,
+        /declare\s+console/,
+        /declare\s+setTimeout/,
+        /declare\s+setInterval/,
+        /declare\s+clearTimeout/,
+        /declare\s+clearInterval/,
+        /declare\s+setImmediate/,
+        /declare\s+clearImmediate/,
+        /declare\s+require/,
+        /declare\s+module/,
+        /declare\s+exports/,
+        /declare\s+__dirname/,
+        /declare\s+__filename/,
+        /declare\s+process/,
+        /declare\s+Buffer/,
+        /declare\s+console/,
+        /declare\s+setTimeout/,
+        /declare\s+setInterval/,
+        /declare\s+clearTimeout/,
+        /declare\s+clearInterval/,
+        /declare\s+setImmediate/,
+        /declare\s+clearImmediate/
     ],
     'python': [
         /def\s+\w+\s*\(/,
@@ -479,7 +535,24 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /->/,
         /|>/,
         /%{/,
-        /%w\(/
+        /%w\(/,
+        /fn\s+\w+\s*->/,
+        /with\s+\w+\s+do/,
+        /for\s+\w+\s+<-/,
+        /if\s+\w+\s+do/,
+        /unless\s+\w+\s+do/,
+        /defimpl\s+\w+/,
+        /defprotocol\s+\w+/,
+        /defstruct\s*\[/,
+        /@type\s+\w+/,
+        /@spec\s+\w+/,
+        /@callback\s+\w+/,
+        /@doc\s+["""]/,
+        /@moduledoc\s+["""]/,
+        /@external_resource/,
+        /@compile\s+\w+/,
+        /@deprecated/,
+        /@since\s+\d+\.\d+/
     ],
     'haskell': [
         /module\s+\w+/,
@@ -707,6 +780,15 @@ export function detectLanguage(code: string): ProgrammingLanguage {
         if (hasBladeDirectives) {
             scores['blade'] += 50; // Очень высокий приоритет для Blade
             scores['php-blade'] += 60; // Еще выше для php-blade
+        }
+    }
+
+    // Приоритет для TypeScript - если есть TypeScript специфичные паттерны
+    if (scores['typescript'] > 0) {
+        const typescriptPatterns = ['interface', 'type', 'import type', 'export type', 'export interface', 'export enum', 'declare', 'as', 'implements', 'extends', 'readonly', 'private', 'public', 'protected'];
+        const hasTypeScriptPatterns = typescriptPatterns.some(pattern => code.includes(pattern));
+        if (hasTypeScriptPatterns) {
+            scores['typescript'] += 40; // Высокий приоритет для TypeScript
         }
     }
 
