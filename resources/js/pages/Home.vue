@@ -147,16 +147,19 @@
                                 </div>
 
                                 <div class="form-row">
-                                    <!-- Шифрование -->
+                                    <!-- Приватность -->
                                     <div class="form-field-half">
-                                        <label class="form-checkbox-label">
-                                            <input
-                                                type="checkbox"
-                                                v-model="form.is_encrypted"
-                                                class="form-checkbox"
-                                            />
-                                            <span class="form-checkbox-text">Зашифровать сниппет</span>
-                                        </label>
+                                        <label for="privacy" class="form-label">Приватность</label>
+                                        <select
+                                            id="privacy"
+                                            v-model="form.privacy"
+                                            class="form-select"
+                                            required
+                                        >
+                                            <option value="private">🔒 Приватный (доступ по паролю)</option>
+                                            <option value="unlisted">🔗 По ссылке (не в поиске)</option>
+                                            <option value="public">🌐 Публичный (как GitHub)</option>
+                                        </select>
                                     </div>
 
                                     <!-- Время жизни -->
@@ -175,6 +178,33 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="form-row">
+                                    <!-- Шифрование -->
+                                    <div class="form-field-half">
+                                        <label class="form-checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                v-model="form.is_encrypted"
+                                                class="form-checkbox"
+                                            />
+                                            <span class="form-checkbox-text">Зашифровать сниппет</span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Пароль (если приватный) -->
+                                    <div class="form-field-half" v-if="form.privacy === 'private'">
+                                        <label for="password" class="form-label">Пароль доступа</label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            v-model="form.password"
+                                            class="form-input"
+                                            placeholder="Введите пароль"
+                                            required
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Кнопка создания -->
@@ -189,6 +219,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Футер -->
+        <Footer />
     </div>
 </template>
 
@@ -199,6 +232,7 @@ import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types'
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
 import Navigation from '@/components/Navigation.vue';
+import Footer from '@/components/Footer.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -216,7 +250,9 @@ const form = reactive<CreateSnippetForm>({
     language: 'php' as ProgrammingLanguage,
     theme: 'vs-dark' as CodeTheme,
     is_encrypted: false,
-    expires_at: '1'
+    expires_at: '1',
+    privacy: 'private',
+    password: ''
 });
 
 const detectedLanguage = ref<string>('');
@@ -286,6 +322,8 @@ const createSnippet = async (): Promise<void> => {
 .home-container {
     min-height: 100vh;
     background: var(--gradient-background);
+    display: flex;
+    flex-direction: column;
 }
 
 .home-content {
@@ -294,6 +332,7 @@ const createSnippet = async (): Promise<void> => {
     padding: 0 1rem;
     padding-top: 3rem;
     padding-bottom: 3rem;
+    flex: 1;
 }
 
 @media (min-width: 640px) {
@@ -564,7 +603,7 @@ const createSnippet = async (): Promise<void> => {
     gap: 0.5rem;
 }
 
-.form-select {
+.form-select, .form-input {
     display: block;
     width: 100%;
     padding: 0.75rem 1rem;
@@ -575,7 +614,7 @@ const createSnippet = async (): Promise<void> => {
     font-size: 0.875rem;
 }
 
-.form-select:focus {
+.form-select:focus, .form-input:focus {
     outline: none;
     ring: 2px;
     ring-color: var(--color-primary);

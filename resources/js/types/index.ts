@@ -6,6 +6,8 @@ export interface CodeSnippet {
     language: string;
     theme: string;
     is_encrypted: boolean;
+    privacy: 'private' | 'unlisted' | 'public';
+    password?: string;
     user_id?: number;
     is_guest: boolean;
     edit_token?: string;
@@ -24,6 +26,8 @@ export interface CreateSnippetRequest {
     theme: string;
     is_encrypted?: boolean;
     expires_at?: string;
+    privacy?: 'private' | 'unlisted' | 'public';
+    password?: string;
 }
 
 // Типы для API ответов
@@ -59,6 +63,8 @@ export interface CreateSnippetForm {
     theme: CodeTheme;
     is_encrypted?: boolean;
     expires_at?: string;
+    privacy?: 'private' | 'unlisted' | 'public';
+    password?: string;
 }
 
 // Типы для языков программирования

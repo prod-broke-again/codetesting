@@ -16,6 +16,8 @@ class Code extends Model
         'language',
         'theme',
         'is_encrypted',
+        'privacy',
+        'password',
         'user_id',
         'is_guest',
         'edit_token',

@@ -35,6 +35,8 @@ class CreateSnippetRequest extends FormRequest
             ])],
             'is_encrypted' => ['sometimes', 'boolean'],
             'expires_at' => ['sometimes', 'nullable', 'date', 'after:now'],
+            'privacy' => ['sometimes', 'string', Rule::in(['private', 'unlisted', 'public'])],
+            'password' => ['sometimes', 'nullable', 'string', 'min:4', 'max:255'],
         ];
     }
 
@@ -51,6 +53,9 @@ class CreateSnippetRequest extends FormRequest
             'theme.required' => 'Тема оформления обязательна',
             'theme.in' => 'Выбрана неподдерживаемая тема',
             'expires_at.after' => 'Время истечения должно быть в будущем',
+            'privacy.in' => 'Выбран неподдерживаемый тип приватности',
+            'password.min' => 'Пароль должен содержать минимум 4 символа',
+            'password.max' => 'Пароль не может превышать 255 символов',
         ];
     }
 
@@ -65,6 +70,8 @@ class CreateSnippetRequest extends FormRequest
             'theme' => 'тема оформления',
             'is_encrypted' => 'шифрование',
             'expires_at' => 'время истечения',
+            'privacy' => 'приватность',
+            'password' => 'пароль',
         ];
     }
 }
