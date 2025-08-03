@@ -172,26 +172,44 @@ const onCodeInput = () => {
 };
 
 const autoDetectLanguage = () => {
-    if (!form.content.trim()) return;
+    if (!form.content.trim()) {
+        alert('Введите код для автоопределения языка');
+        return;
+    }
     
     const detectedLanguage = detectLanguage(form.content);
     const confidence = getDetectionConfidence(form.content, detectedLanguage);
     const alternatives = getAlternativeLanguages(form.content, detectedLanguage);
     
-    // Обновляем язык только если уверенность выше 60%
-    if (confidence > 60) {
-        form.language = detectedLanguage;
-    }
+    // Обновляем язык независимо от уверенности при ручном нажатии кнопки
+    form.language = detectedLanguage;
     
     detectionConfidence.value = confidence;
     alternativeLanguages.value = alternatives;
+    
+    console.log('Автоопределение:', {
+        detectedLanguage,
+        confidence,
+        alternatives,
+        content: form.content.substring(0, 100) + '...'
+    });
 };
 
 // Следим за изменениями контента для автоматического определения
 watch(() => form.content, (newContent) => {
     if (newContent.trim() && newContent.length > 10) {
         // Автоматически определяем язык при достаточном количестве кода
-        autoDetectLanguage();
+        const detectedLanguage = detectLanguage(newContent);
+        const confidence = getDetectionConfidence(newContent, detectedLanguage);
+        const alternatives = getAlternativeLanguages(newContent, detectedLanguage);
+        
+        // Обновляем язык только если уверенность выше 60%
+        if (confidence > 60) {
+            form.language = detectedLanguage;
+        }
+        
+        detectionConfidence.value = confidence;
+        alternativeLanguages.value = alternatives;
     }
 }, { deep: true });
 
