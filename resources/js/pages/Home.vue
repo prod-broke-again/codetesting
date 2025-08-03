@@ -233,7 +233,7 @@ const createSnippet = async (): Promise<void> => {
 
         if (response.ok) {
             const data = await response.json();
-            router.push(`/code/${data.hash}`);
+            router.push(`/code/${data.data.hash}`);
         } else {
             throw new Error('Ошибка создания сниппета');
         }
