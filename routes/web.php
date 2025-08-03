@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CodeController;
+use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\MySnippetsController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialiteController;
 
@@ -19,6 +22,15 @@ use App\Http\Controllers\Auth\SocialiteController;
 
 // Главная страница (создание сниппета)
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Обзор публичных сниппетов
+Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
+
+// Мои сниппеты (требует авторизации)
+Route::get('/my-snippets', [MySnippetsController::class, 'index'])->name('my-snippets');
+
+// Дашборд (требует авторизации)
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Просмотр сниппета
 Route::get('/code/{hash}', [CodeController::class, 'show'])->name('code.show');
