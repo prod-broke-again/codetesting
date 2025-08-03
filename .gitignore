@@ -130,3 +130,6 @@ $RECYCLE.BIN/
 # Cache
 .cache/
 .temp/
+
+# Internal documentation
+RULES.md
