@@ -1,41 +1,19 @@
 import './bootstrap';
-import { createApp } from 'vue';
+import { createApp, h } from 'vue';
+import { createInertiaApp } from '@inertiajs/vue3';
 import { createPinia } from 'pinia';
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import App from './App.vue';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-// Создание приложения
-const app = createApp(App);
-
-// Настройка Pinia для управления состоянием
-const pinia = createPinia();
-app.use(pinia);
-
-// Определение маршрутов с типизацией
-const routes: RouteRecordRaw[] = [
-    {
-        path: '/',
-        name: 'home',
-        component: () => import('./pages/Home.vue')
+createInertiaApp({
+    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue') as any),
+    setup({ el, App, props, plugin }) {
+        const app = createApp({ render: () => h(App, props) });
+        
+        // Настройка Pinia для управления состоянием
+        const pinia = createPinia();
+        app.use(pinia);
+        
+        app.use(plugin);
+        app.mount(el);
     },
-    {
-        path: '/code/:hash',
-        name: 'code-view',
-        component: () => import('./pages/CodeView.vue')
-    },
-    {
-        path: '/create',
-        name: 'code-create',
-        component: () => import('./pages/CodeCreate.vue')
-    }
-];
-
-// Настройка Vue Router
-const router = createRouter({
-    history: createWebHistory(),
-    routes
-});
-app.use(router);
-
-// Монтирование приложения
-app.mount('#app'); 
+}); 

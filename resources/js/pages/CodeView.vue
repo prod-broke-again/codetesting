@@ -1,84 +1,57 @@
 <template>
-    <div class="max-w-6xl mx-auto">
-        <div v-if="loading" class="text-center py-8">
+    <div class="max-w-4xl mx-auto">
+        <div v-if="isLoading" class="text-center py-8">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p class="mt-4 text-gray-600">Загрузка сниппета...</p>
         </div>
 
         <div v-else-if="error" class="text-center py-8">
-            <div class="text-red-600 text-xl mb-4">{{ error }}</div>
-            <router-link to="/" class="text-blue-600 hover:underline">
-                Вернуться на главную
-            </router-link>
+            <div class="text-red-600 text-xl mb-4">Ошибка загрузки</div>
+            <p class="text-gray-600">{{ error }}</p>
+            <button @click="loadSnippet" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Попробовать снова
+            </button>
         </div>
 
-        <div v-else-if="snippet" class="space-y-6">
+        <div v-else-if="snippet" class="bg-white rounded-lg shadow-md">
             <!-- Заголовок -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex justify-between items-start">
+            <div class="border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 mb-2">
-                            Сниппет кода
-                        </h1>
-                        <div class="flex items-center space-x-4 text-sm text-gray-600">
-                            <span>Язык: {{ getLanguageName(snippet.language) }}</span>
-                            <span>Тема: {{ getThemeName(snippet.theme) }}</span>
-                            <span>Просмотров: {{ snippet.access_count }}</span>
-                            <span v-if="snippet.expires_at">
-                                Истекает: {{ formatDate(snippet.expires_at) }}
-                            </span>
-                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900">Сниппет кода</h1>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Язык: {{ getLanguageName(snippet.language) }} | 
+                            Тема: {{ getThemeName(snippet.theme) }} |
+                            Просмотров: {{ snippet.access_count }}
+                        </p>
                     </div>
                     <div class="flex space-x-2">
                         <button 
                             @click="copyCode"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                            class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200"
                         >
-                            Копировать код
+                            📋 Копировать код
                         </button>
                         <button 
                             @click="copyUrl"
-                            class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                            class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200"
                         >
-                            Копировать ссылку
+                            🔗 Копировать ссылку
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Редактор кода -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="bg-gray-800 px-4 py-2 flex justify-between items-center">
-                    <span class="text-white font-mono text-sm">{{ getLanguageName(snippet.language) }}</span>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-gray-400 text-xs">{{ snippet.language }}</span>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <pre class="bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto"><code>{{ snippet.content }}</code></pre>
-                </div>
+            <!-- Код -->
+            <div class="p-6">
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code>{{ snippet.content }}</code></pre>
             </div>
 
-            <!-- Информация о сниппете -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold mb-4">Информация о сниппете</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <span class="font-medium">Создан:</span>
-                        <span class="ml-2">{{ formatDate(snippet.created_at) }}</span>
-                    </div>
-                    <div>
-                        <span class="font-medium">Хеш:</span>
-                        <span class="ml-2 font-mono">{{ snippet.hash }}</span>
-                    </div>
-                    <div>
-                        <span class="font-medium">Шифрование:</span>
-                        <span class="ml-2">{{ snippet.is_encrypted ? 'Включено' : 'Отключено' }}</span>
-                    </div>
-                    <div>
-                        <span class="font-medium">Тип:</span>
-                        <span class="ml-2">{{ snippet.is_guest ? 'Гостевой' : 'Зарегистрированный' }}</span>
-                    </div>
+            <!-- Информация -->
+            <div class="border-t border-gray-200 px-6 py-4">
+                <div class="text-sm text-gray-500">
+                    <p>Создан: {{ formatDate(snippet.created_at) }}</p>
+                    <p v-if="snippet.expires_at">Истекает: {{ formatDate(snippet.expires_at) }}</p>
                 </div>
             </div>
         </div>
@@ -87,50 +60,38 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import type { CodeSnippet } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 
-const route = useRoute();
-const loading = ref<boolean>(true);
-const error = ref<string>('');
+// Props от Inertia.js
+interface Props {
+    hash: string;
+}
+
+const props = defineProps<Props>();
+
 const snippet = ref<CodeSnippet | null>(null);
+const isLoading = ref<boolean>(true);
+const error = ref<string | null>(null);
 
-const fetchSnippet = async (): Promise<void> => {
+const loadSnippet = async () => {
+    isLoading.value = true;
+    error.value = null;
+    
     try {
-        const response = await fetch(`/api/codes/${route.params.hash}`);
+        const response = await fetch(`/api/codes/${props.hash}`);
         
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Сниппет не найден');
+        if (response.ok) {
+            const data = await response.json();
+            snippet.value = data.data;
+        } else {
+            error.value = 'Сниппет не найден или недоступен';
         }
-
-        const data = await response.json();
-        snippet.value = data.data;
     } catch (err) {
-        error.value = err instanceof Error ? err.message : 'Ошибка загрузки сниппета';
+        error.value = 'Ошибка загрузки сниппета';
+        console.error('Error:', err);
     } finally {
-        loading.value = false;
-    }
-};
-
-const copyCode = async (): Promise<void> => {
-    if (snippet.value) {
-        try {
-            await navigator.clipboard.writeText(snippet.value.content);
-            alert('Код скопирован в буфер обмена');
-        } catch (err) {
-            console.error('Ошибка копирования:', err);
-        }
-    }
-};
-
-const copyUrl = async (): Promise<void> => {
-    try {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Ссылка скопирована в буфер обмена');
-    } catch (err) {
-        console.error('Ошибка копирования:', err);
+        isLoading.value = false;
     }
 };
 
@@ -146,7 +107,27 @@ const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString('ru-RU');
 };
 
+const copyCode = async () => {
+    if (snippet.value) {
+        try {
+            await navigator.clipboard.writeText(snippet.value.content);
+            alert('Код скопирован в буфер обмена');
+        } catch (err) {
+            console.error('Ошибка копирования:', err);
+        }
+    }
+};
+
+const copyUrl = async () => {
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Ссылка скопирована в буфер обмена');
+    } catch (err) {
+        console.error('Ошибка копирования:', err);
+    }
+};
+
 onMounted(() => {
-    fetchSnippet();
+    loadSnippet();
 });
 </script> 

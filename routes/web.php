@@ -1,13 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-// Главная страница - отдаем Vue приложение
+// Главная страница - создание сниппета
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('Home');
 });
 
-// Роуты для Vue приложения - все остальные запросы отдаем в Vue
-Route::get('/{any}', function () {
-    return view('welcome');
-})->where('any', '.*');
+// Просмотр сниппета
+Route::get('/code/{hash}', function (string $hash) {
+    return Inertia::render('CodeView', [
+        'hash' => $hash
+    ]);
+});
+
+// Создание сниппета (отдельная страница)
+Route::get('/create', function () {
+    return Inertia::render('CodeCreate');
+});

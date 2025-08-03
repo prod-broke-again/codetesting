@@ -55,8 +55,10 @@ export interface Fingerprint {
 // Типы для форм
 export interface CreateSnippetForm {
     content: string;
-    language: string;
-    theme: string;
+    language: ProgrammingLanguage;
+    theme: CodeTheme;
+    is_encrypted?: boolean;
+    expires_at?: string;
 }
 
 // Типы для языков программирования

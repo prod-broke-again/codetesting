@@ -5,7 +5,7 @@
                 Создать новый сниппет
             </h1>
             <p class="text-xl text-gray-600">
-                Создайте зашифрованный сниппет кода для обмена с коллегами
+                Расширенные настройки для создания сниппета
             </p>
         </div>
 
@@ -81,6 +81,37 @@
                     </select>
                 </div>
 
+                <!-- Дополнительные настройки -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Шифрование -->
+                    <div>
+                        <label class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                v-model="form.is_encrypted"
+                                class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                            >
+                            <span class="ml-2 text-sm text-gray-700">Зашифровать сниппет</span>
+                        </label>
+                    </div>
+
+                    <!-- Время жизни -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Время жизни
+                        </label>
+                        <select 
+                            v-model="form.expires_at"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">Без ограничений</option>
+                            <option value="1">1 день</option>
+                            <option value="7">7 дней</option>
+                            <option value="30">30 дней</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Редактор кода -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -93,34 +124,6 @@
                         placeholder="Введите ваш код здесь..."
                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                     ></textarea>
-                </div>
-
-                <!-- Дополнительные опции -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="flex items-center">
-                            <input 
-                                type="checkbox" 
-                                v-model="form.is_encrypted"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            >
-                            <span class="ml-2 text-sm text-gray-700">Включить шифрование</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Время истечения
-                        </label>
-                        <select 
-                            v-model="form.expires_at"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="">Без ограничений</option>
-                            <option value="1">1 день</option>
-                            <option value="7">7 дней</option>
-                            <option value="30">30 дней</option>
-                        </select>
-                    </div>
                 </div>
 
                 <!-- Кнопка создания -->
@@ -140,17 +143,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { router } from '@inertiajs/vue3';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
 
-const router = useRouter();
 const isLoading = ref<boolean>(false);
 const detectionConfidence = ref<number>(0);
 const alternativeLanguages = ref<ProgrammingLanguage[]>([]);
 
-const form = reactive<CreateSnippetForm & { is_encrypted: boolean; expires_at: string }>({
+const form = reactive<CreateSnippetForm>({
     content: '',
     language: 'php' as ProgrammingLanguage,
     theme: 'vs-dark' as CodeTheme,
@@ -183,7 +185,7 @@ const additionalLanguages = computed(() => {
 const themeOptions = computed(() => THEME_OPTIONS);
 
 // Автоматическое определение языка при вводе кода
-let detectionTimeout: NodeJS.Timeout | null = null;
+let detectionTimeout: number | null = null;
 
 const onCodeInput = () => {
     // Очищаем предыдущий таймаут
@@ -279,7 +281,7 @@ const createSnippet = async (): Promise<void> => {
             }
             
             // Переходим к просмотру сниппета
-            router.push(`/code/${data.data.hash}`);
+            router.visit(`/code/${data.data.hash}`);
         } else {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Ошибка создания сниппета');

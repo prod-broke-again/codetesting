@@ -114,12 +114,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { router } from '@inertiajs/vue3';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
 
-const router = useRouter();
 const isLoading = ref<boolean>(false);
 const detectionConfidence = ref<number>(0);
 const alternativeLanguages = ref<ProgrammingLanguage[]>([]);
@@ -155,7 +154,7 @@ const additionalLanguages = computed(() => {
 const themeOptions = computed(() => THEME_OPTIONS);
 
 // Автоматическое определение языка при вводе кода
-let detectionTimeout: NodeJS.Timeout | null = null;
+let detectionTimeout: number | null = null;
 
 const onCodeInput = () => {
     // Очищаем предыдущий таймаут
@@ -233,7 +232,7 @@ const createSnippet = async (): Promise<void> => {
 
         if (response.ok) {
             const data = await response.json();
-            router.push(`/code/${data.data.hash}`);
+            router.visit(`/code/${data.data.hash}`);
         } else {
             throw new Error('Ошибка создания сниппета');
         }
