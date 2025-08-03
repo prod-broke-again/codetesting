@@ -17,6 +17,18 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Язык программирования
                     </label>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <button 
+                            type="button"
+                            @click="autoDetectLanguage"
+                            class="text-sm text-blue-600 hover:text-blue-800 underline"
+                        >
+                            🔍 Автоопределение
+                        </button>
+                        <span v-if="detectionConfidence > 0" class="text-sm text-gray-500">
+                            Уверенность: {{ detectionConfidence }}%
+                        </span>
+                    </div>
                     <select 
                         v-model="form.language"
                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -37,6 +49,21 @@
                             </option>
                         </optgroup>
                     </select>
+                    <!-- Альтернативные языки -->
+                    <div v-if="alternativeLanguages.length > 0" class="mt-2">
+                        <p class="text-xs text-gray-500 mb-1">Возможные альтернативы:</p>
+                        <div class="flex flex-wrap gap-1">
+                            <button 
+                                v-for="lang in alternativeLanguages" 
+                                :key="lang"
+                                type="button"
+                                @click="form.language = lang"
+                                class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded"
+                            >
+                                {{ LANGUAGE_OPTIONS[lang] }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Выбор темы -->
@@ -61,6 +88,7 @@
                     </label>
                     <textarea 
                         v-model="form.content"
+                        @input="onCodeInput"
                         rows="12"
                         placeholder="Введите ваш код здесь..."
                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
@@ -111,13 +139,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
+import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
 
 const router = useRouter();
 const isLoading = ref<boolean>(false);
+const detectionConfidence = ref<number>(0);
+const alternativeLanguages = ref<ProgrammingLanguage[]>([]);
 
 const form = reactive<CreateSnippetForm & { is_encrypted: boolean; expires_at: string }>({
     content: '',
@@ -150,6 +181,47 @@ const additionalLanguages = computed(() => {
 });
 
 const themeOptions = computed(() => THEME_OPTIONS);
+
+// Автоматическое определение языка при вводе кода
+let detectionTimeout: NodeJS.Timeout | null = null;
+
+const onCodeInput = () => {
+    // Очищаем предыдущий таймаут
+    if (detectionTimeout) {
+        clearTimeout(detectionTimeout);
+    }
+    
+    // Запускаем определение через 1 секунду после остановки ввода
+    detectionTimeout = setTimeout(() => {
+        if (form.content.trim()) {
+            autoDetectLanguage();
+        }
+    }, 1000);
+};
+
+const autoDetectLanguage = () => {
+    if (!form.content.trim()) return;
+    
+    const detectedLanguage = detectLanguage(form.content);
+    const confidence = getDetectionConfidence(form.content, detectedLanguage);
+    const alternatives = getAlternativeLanguages(form.content, detectedLanguage);
+    
+    // Обновляем язык только если уверенность выше 60%
+    if (confidence > 60) {
+        form.language = detectedLanguage;
+    }
+    
+    detectionConfidence.value = confidence;
+    alternativeLanguages.value = alternatives;
+};
+
+// Следим за изменениями контента для автоматического определения
+watch(() => form.content, (newContent) => {
+    if (newContent.trim() && newContent.length > 10) {
+        // Автоматически определяем язык при достаточном количестве кода
+        autoDetectLanguage();
+    }
+}, { deep: true });
 
 const createSnippet = async (): Promise<void> => {
     if (!form.content.trim()) {
