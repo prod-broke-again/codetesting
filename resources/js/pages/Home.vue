@@ -1,242 +1,191 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div class="home-container">
         <!-- Навигация -->
         <Navigation :user="user" />
         
         <!-- Основной контент -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="home-content">
             <!-- Заголовок -->
-            <div class="text-center mb-12">
-                <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <div class="home-header">
+                <h1 class="home-title">
                     {{ title }}
                 </h1>
-                <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                <p class="home-description">
                     {{ description }}
                 </p>
             </div>
 
             <!-- Статистика -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-icon stat-icon-blue">
+                            <svg class="stat-svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Сниппетов создано</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">1,234</p>
+                        <div class="stat-info">
+                            <p class="stat-label">Сниппетов создано</p>
+                            <p class="stat-value">1,234</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-icon stat-icon-green">
+                            <svg class="stat-svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Языков поддержки</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">30+</p>
+                        <div class="stat-info">
+                            <p class="stat-label">Языков поддержки</p>
+                            <p class="stat-value">30+</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-icon stat-icon-purple">
+                            <svg class="stat-svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Активных пользователей</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">567</p>
+                        <div class="stat-info">
+                            <p class="stat-label">Активных пользователей</p>
+                            <p class="stat-value">567</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Форма создания сниппета -->
-            <div class="max-w-4xl mx-auto">
-                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+            <div class="form-container">
+                <div class="form-card">
                     <!-- Заголовок формы -->
-                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-white/20 rounded-lg">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="form-header">
+                        <div class="form-header-content">
+                            <div class="form-header-icon">
+                                <svg class="form-header-svg" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-2xl font-bold text-white">Создать новый сниппет</h2>
-                                <p class="text-blue-100">Быстро и безопасно поделитесь своим кодом</p>
+                                <h2 class="form-header-title">Создать новый сниппет</h2>
+                                <p class="form-header-subtitle">Быстро и безопасно поделитесь своим кодом</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Содержимое формы -->
-                    <div class="p-8">
-                        <form @submit.prevent="createSnippet" class="space-y-6">
+                    <div class="form-body">
+                        <form @submit.prevent="createSnippet" class="form">
                             <!-- Поле для кода -->
-                            <div>
-                                <label for="code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <div class="form-field">
+                                <label for="code" class="form-label">
                                     Ваш код
                                 </label>
-                                <div class="relative">
+                                <div class="form-input-container">
                                     <textarea
                                         id="code"
                                         v-model="form.content"
                                         @input="onCodeInput"
                                         rows="12"
-                                        class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
+                                        class="form-textarea"
                                         placeholder="Вставьте ваш код здесь..."
                                         required
                                     ></textarea>
                                     
                                     <!-- Индикатор определения языка -->
-                                    <div v-if="detectionConfidence > 0" class="absolute top-3 right-3 flex items-center space-x-2">
-                                        <div class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-                                            {{ detectionConfidence }}% {{ detectedLanguage }}
+                                    <div class="language-indicator">
+                                        <div class="language-info">
+                                            <span class="language-label">Определенный язык:</span>
+                                            <span class="language-value">{{ detectedLanguage }}</span>
                                         </div>
-                                        <button
-                                            type="button"
-                                            @click="autoDetectLanguage"
-                                            class="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
-                                            title="Автоопределение языка"
-                                        >
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
+                                        <div class="confidence-info">
+                                            <span class="confidence-label">Уверенность:</span>
+                                            <span class="confidence-value">{{ confidence }}%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Настройки -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <!-- Язык программирования -->
-                                <div>
-                                    <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Язык программирования
-                                    </label>
-                                    <select
-                                        id="language"
-                                        v-model="form.language"
-                                        class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">
-                                            {{ label }}
-                                        </option>
-                                    </select>
+                            <!-- Настройки сниппета -->
+                            <div class="form-settings">
+                                <div class="form-row">
+                                    <!-- Выбор языка -->
+                                    <div class="form-field-half">
+                                        <label for="language" class="form-label">Язык программирования</label>
+                                        <select
+                                            id="language"
+                                            v-model="form.language"
+                                            class="form-select"
+                                            required
+                                        >
+                                            <option value="">Автоопределение</option>
+                                            <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">
+                                                {{ label }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Выбор темы -->
+                                    <div class="form-field-half">
+                                        <label for="theme" class="form-label">Тема подсветки</label>
+                                        <select
+                                            id="theme"
+                                            v-model="form.theme"
+                                            class="form-select"
+                                            required
+                                        >
+                                            <option v-for="(label, value) in THEME_OPTIONS" :key="value" :value="value">
+                                                {{ label }}
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <!-- Тема оформления -->
-                                <div>
-                                    <label for="theme" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Тема оформления
-                                    </label>
-                                    <select
-                                        id="theme"
-                                        v-model="form.theme"
-                                        class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option v-for="(label, value) in THEME_OPTIONS" :key="value" :value="value">
-                                            {{ label }}
-                                        </option>
-                                    </select>
-                                </div>
+                                <div class="form-row">
+                                    <!-- Шифрование -->
+                                    <div class="form-field-half">
+                                        <label class="form-checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                v-model="form.is_encrypted"
+                                                class="form-checkbox"
+                                            />
+                                            <span class="form-checkbox-text">Зашифровать сниппет</span>
+                                        </label>
+                                    </div>
 
-                                <!-- Время истечения -->
-                                <div>
-                                    <label for="expires_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Время жизни
-                                    </label>
-                                    <select
-                                        id="expires_at"
-                                        v-model="form.expires_at"
-                                        class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="1">1 день</option>
-                                        <option value="7">7 дней</option>
-                                        <option value="30">30 дней</option>
-                                        <option value="0">Навсегда</option>
-                                    </select>
+                                    <!-- Время жизни -->
+                                    <div class="form-field-half">
+                                        <label for="expires_at" class="form-label">Время жизни</label>
+                                        <select
+                                            id="expires_at"
+                                            v-model="form.expires_at"
+                                            class="form-select"
+                                        >
+                                            <option value="">Без ограничений</option>
+                                            <option value="1h">1 час</option>
+                                            <option value="24h">24 часа</option>
+                                            <option value="7d">7 дней</option>
+                                            <option value="30d">30 дней</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <!-- Дополнительные опции -->
-                            <div class="flex items-center space-x-6">
-                                <label class="flex items-center">
-                                    <input
-                                        v-model="form.is_encrypted"
-                                        type="checkbox"
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                    />
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Зашифровать сниппет</span>
-                                </label>
                             </div>
 
                             <!-- Кнопка создания -->
-                            <div class="flex justify-center">
-                                <button
-                                    type="submit"
-                                    :disabled="isLoading"
-                                    class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                                >
-                                    <div v-if="isLoading" class="flex items-center space-x-2">
-                                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>Создание...</span>
-                                    </div>
-                                    <div v-else class="flex items-center space-x-2">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span>Создать сниппет</span>
-                                    </div>
+                            <div class="form-actions">
+                                <button type="submit" class="form-submit" :disabled="isLoading">
+                                    <span v-if="isLoading">Создание...</span>
+                                    <span v-else>Создать сниппет</span>
                                 </button>
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
-
-            <!-- Особенности -->
-            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Безопасность</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Ваш код защищен шифрованием и временными токенами доступа</p>
-                </div>
-                
-                <div class="text-center">
-                    <div class="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">30+ языков</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Поддержка всех популярных языков программирования</p>
-                </div>
-                
-                <div class="text-center">
-                    <div class="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Умное восстановление</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Автоматическое связывание сниппетов по fingerprint</p>
                 </div>
             </div>
         </div>
@@ -272,6 +221,7 @@ const form = reactive<CreateSnippetForm>({
 
 const detectedLanguage = ref<string>('');
 const detectionConfidence = ref<number>(0);
+const confidence = ref<number>(0);
 const alternativeLanguages = ref<string[]>([]);
 
 const onCodeInput = () => {
@@ -282,10 +232,12 @@ const onCodeInput = () => {
     detectionTimeout = setTimeout(() => {
         const result = detectLanguage(form.content);
         detectedLanguage.value = result;
-        detectionConfidence.value = getDetectionConfidence(form.content, result);
+        const confidenceValue = getDetectionConfidence(form.content, result);
+        detectionConfidence.value = confidenceValue;
+        confidence.value = confidenceValue;
         alternativeLanguages.value = getAlternativeLanguages(form.content);
         
-        if (detectionConfidence.value > 60) {
+        if (confidenceValue > 60) {
             form.language = result as ProgrammingLanguage;
         }
     }, 500);
@@ -327,8 +279,354 @@ const createSnippet = async (): Promise<void> => {
     }
 };
 
-// Следим за изменениями контента для автоопределения языка
-watch(() => form.content, () => {
-    onCodeInput();
-});
+
 </script> 
+
+<style scoped>
+.home-container {
+    min-height: 100vh;
+    background: var(--gradient-background);
+}
+
+.home-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+@media (min-width: 640px) {
+    .home-content {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-content {
+        padding: 0 2rem;
+    }
+}
+
+.home-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.home-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@media (min-width: 768px) {
+    .home-title {
+        font-size: 3.75rem;
+    }
+}
+
+.home-description {
+    font-size: 1.25rem;
+    color: var(--color-textSecondary);
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+    .home-description {
+        font-size: 1.5rem;
+    }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.stat-card {
+    background-color: var(--color-surface);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+}
+
+.stat-icon {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon-blue {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary);
+}
+
+.stat-icon-green {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+}
+
+.stat-icon-purple {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: var(--color-secondary);
+}
+
+.stat-svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.stat-info {
+    margin-left: 1rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-textSecondary);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.form-container {
+    max-width: 64rem;
+    margin: 0 auto;
+}
+
+.form-card {
+    background-color: var(--color-surface);
+    backdrop-filter: blur(12px);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.form-header {
+    background: var(--gradient-primary);
+    padding: 2rem;
+}
+
+.form-header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-header-icon {
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+}
+
+.form-header-svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: white;
+}
+
+.form-header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.form-header-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.form-body {
+    padding: 2rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.form-input-container {
+    position: relative;
+}
+
+.form-textarea {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    resize: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.form-textarea:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: var(--color-primary);
+    border-color: transparent;
+}
+
+.form-textarea::placeholder {
+    color: var(--color-textSecondary);
+}
+
+.language-indicator {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background-color: var(--color-surface);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    font-size: 0.75rem;
+}
+
+.language-info, .confidence-info {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.language-label, .confidence-label {
+    color: var(--color-textSecondary);
+}
+
+.language-value, .confidence-value {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.form-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-field-half {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.875rem;
+}
+
+.form-select:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: var(--color-primary);
+    border-color: transparent;
+}
+
+.form-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.form-checkbox {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-primary);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+}
+
+.form-checkbox-text {
+    font-size: 0.875rem;
+    color: var(--color-text);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.form-submit {
+    padding: 1rem 2rem;
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.form-submit:hover:not(:disabled) {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style> 

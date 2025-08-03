@@ -1,33 +1,29 @@
 <template>
-    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+    <nav class="nav-container">
+        <div class="nav-content">
+            <div class="nav-header">
                 <!-- Логотип -->
-                <div class="flex items-center space-x-3">
-                    <div class="flex-shrink-0">
-                        <a href="/" class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                CodeTesting.ru
-                            </span>
-                        </a>
-                    </div>
+                <div class="nav-logo">
+                    <a href="/" class="logo-link">
+                        <div class="logo-icon">
+                            <svg class="logo-svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="logo-text">
+                            CodeTesting.ru
+                        </span>
+                    </a>
                 </div>
 
                 <!-- Центральная навигация -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
+                <div class="nav-menu">
+                    <div class="nav-links">
                         <a
                             href="/"
-                            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                            class="nav-link"
                             :class="[
-                                $page.url === '/' 
-                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
-                                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                                $page.url === '/' ? 'nav-link-active' : 'nav-link-inactive'
                             ]"
                         >
                             Главная
@@ -36,84 +32,60 @@
                 </div>
 
                 <!-- Правая часть навигации -->
-                <div class="flex items-center space-x-4">
+                <div class="nav-actions">
                     <!-- Переключатель темы -->
                     <ThemeToggle />
                     
                     <!-- Кнопки авторизации -->
-                    <div v-if="!isAuthenticated" class="flex items-center space-x-2">
-                        <a
-                            href="/auth"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-                        >
+                    <div v-if="!isAuthenticated" class="auth-buttons">
+                        <a href="/auth" class="auth-link">
                             Войти
                         </a>
-                        <a
-                            href="/auth"
-                            class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                        >
+                        <a href="/auth" class="auth-button">
                             Регистрация
                         </a>
                     </div>
 
                     <!-- Профиль пользователя -->
-                    <div v-else class="relative">
-                        <button
-                            @click="toggleUserMenu"
-                            class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-                        >
+                    <div v-else class="user-menu">
+                        <button @click="toggleUserMenu" class="user-button">
                             <img
                                 v-if="user?.avatar"
                                 :src="user.avatar"
                                 :alt="user.name"
-                                class="w-8 h-8 rounded-full"
+                                class="user-avatar"
                             />
-                            <div
-                                v-else
-                                class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
-                            >
-                                <span class="text-white text-sm font-medium">
+                            <div v-else class="user-avatar-placeholder">
+                                <span class="user-avatar-text">
                                     {{ user?.name?.charAt(0)?.toUpperCase() }}
                                 </span>
                             </div>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <span class="user-name">
                                 {{ user?.name }}
                             </span>
-                            <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="user-arrow" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
 
                         <!-- Выпадающее меню пользователя -->
-                        <div
-                            v-if="isUserMenuOpen"
-                            class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
-                        >
-                            <div class="py-1">
-                                <a
-                                    href="/dashboard"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                >
-                                    <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <div v-if="isUserMenuOpen" class="user-dropdown">
+                            <div class="dropdown-content">
+                                <a href="/dashboard" class="dropdown-item">
+                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                                     </svg>
                                     Дашборд
                                 </a>
-                                <a
-                                    href="/profile"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                                >
-                                    <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <a href="/profile" class="dropdown-item">
+                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                     </svg>
                                     Профиль
                                 </a>
-                                <hr class="my-1 border-gray-200 dark:border-gray-700" />
-                                <button
-                                    @click="logout"
-                                    class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150"
-                                >
-                                    <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <hr class="dropdown-divider" />
+                                <button @click="logout" class="dropdown-item dropdown-item-danger">
+                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
                                     </svg>
                                     Выйти
@@ -178,7 +150,7 @@ const logout = async () => {
 
 const handleClickOutside = (event: Event) => {
     const target = event.target as Element;
-    if (!target.closest('.relative')) {
+    if (!target.closest('.user-menu')) {
         isUserMenuOpen.value = false;
     }
 };
@@ -190,4 +162,269 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
-</script> 
+</script>
+
+<style scoped>
+.nav-container {
+    background-color: var(--color-surface);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.nav-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .nav-content {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .nav-content {
+        padding: 0 2rem;
+    }
+}
+
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 2rem;
+    height: 2rem;
+    background: var(--gradient-primary);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.logo-svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: white;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nav-menu {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .nav-menu {
+        display: block;
+    }
+}
+
+.nav-links {
+    margin-left: 2.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.nav-link {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.nav-link-active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.nav-link-inactive {
+    color: var(--color-textSecondary);
+}
+
+.nav-link-inactive:hover {
+    color: var(--color-primary);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auth-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-textSecondary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.auth-link:hover {
+    color: var(--color-primary);
+}
+
+.auth-button {
+    padding: 0.5rem 1rem;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.auth-button:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.user-button:hover {
+    background-color: var(--color-border);
+}
+
+.user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+}
+
+.user-avatar-placeholder {
+    width: 2rem;
+    height: 2rem;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar-text {
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.user-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.user-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-textSecondary);
+}
+
+.user-dropdown {
+    position: absolute;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 12rem;
+    background-color: var(--color-surface);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    z-index: 50;
+}
+
+.dropdown-content {
+    padding: 0.25rem 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.15s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-border);
+}
+
+.dropdown-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.75rem;
+}
+
+.dropdown-divider {
+    margin: 0.25rem 0;
+    border: none;
+    border-top: 1px solid var(--color-border);
+}
+
+.dropdown-item-danger {
+    color: var(--color-error);
+}
+
+.dropdown-item-danger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+</style> 
