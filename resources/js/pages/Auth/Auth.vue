@@ -443,35 +443,29 @@ const handleSubmit = async () => {
     isLoading.value = true;
 
     try {
-        const endpoint = isLoginMode.value ? '/auth/login' : '/auth/register';
         const data = isLoginMode.value 
             ? { email: form.email, password: form.password, remember: form.remember }
             : form;
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                'X-Fingerprint': localStorage.getItem('fingerprint') || ''
+        const endpoint = isLoginMode.value ? '/auth/login' : '/auth/register';
+        
+        // Используем Inertia для отправки формы
+        router.post(endpoint, data, {
+            onSuccess: () => {
+                showNotification('success', 'Успешно!', isLoginMode.value ? 'Вы успешно вошли в систему' : 'Аккаунт успешно создан');
             },
-            body: JSON.stringify(data)
+            onError: (errors) => {
+                // Обновляем ошибки из ответа сервера
+                Object.assign(errors, errors);
+                showNotification('error', 'Ошибка', 'Проверьте правильность введенных данных');
+            },
+            onFinish: () => {
+                isLoading.value = false;
+            }
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showNotification('success', 'Успешно!', isLoginMode.value ? 'Вы успешно вошли в систему' : 'Аккаунт успешно создан');
-            setTimeout(() => {
-                router.visit('/');
-            }, 1500);
-        } else {
-            showNotification('error', 'Ошибка', result.message || 'Произошла ошибка');
-        }
     } catch (error) {
         console.error('Ошибка:', error);
         showNotification('error', 'Ошибка', 'Ошибка соединения с сервером');
-    } finally {
         isLoading.value = false;
     }
 };

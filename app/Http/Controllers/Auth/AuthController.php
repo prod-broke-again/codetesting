@@ -47,11 +47,7 @@ class AuthController extends Controller
                     $this->authService->linkFingerprintToUser($fingerprint, $user);
                 }
                 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Вы успешно вошли в систему',
-                    'user' => $user
-                ]);
+                return redirect()->intended('/')->with('message', 'Вы успешно вошли в систему');
             }
             
             throw ValidationException::withMessages([
@@ -59,16 +55,9 @@ class AuthController extends Controller
             ]);
             
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Неверные учетные данные',
-                'errors' => $e->errors()
-            ], 422);
+            return back()->withErrors($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка входа в систему'
-            ], 500);
+            return back()->withErrors(['email' => 'Ошибка входа в систему']);
         }
     }
 
@@ -82,10 +71,7 @@ class AuthController extends Controller
             
             // Проверяем, не существует ли уже пользователь с таким email
             if ($this->authService->getCurrentUser() || \App\Models\User::where('email', $data['email'])->exists()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Пользователь с таким email уже существует'
-                ], 422);
+                return back()->withErrors(['email' => 'Пользователь с таким email уже существует']);
             }
             
             $user = $this->authService->createUser($data);
@@ -96,17 +82,10 @@ class AuthController extends Controller
                 $this->authService->linkFingerprintToUser($fingerprint, $user);
             }
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Аккаунт успешно создан',
-                'user' => $user
-            ]);
+            return redirect('/')->with('message', 'Аккаунт успешно создан');
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка создания аккаунта'
-            ], 500);
+            return back()->withErrors(['email' => 'Ошибка создания аккаунта']);
         }
     }
 
@@ -118,16 +97,10 @@ class AuthController extends Controller
         try {
             $this->authService->logout();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Вы успешно вышли из системы'
-            ]);
+            return redirect('/')->with('message', 'Вы успешно вышли из системы');
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка выхода из системы'
-            ], 500);
+            return back()->withErrors(['error' => 'Ошибка выхода из системы']);
         }
     }
 
