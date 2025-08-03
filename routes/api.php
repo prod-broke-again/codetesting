@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CodeController;
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
+
+// API маршруты для сниппетов
+Route::prefix('codes')->group(function () {
+    // Создание сниппета (публичный доступ)
+    Route::post('/', [CodeController::class, 'store']);
+    
+    // Просмотр сниппета (публичный доступ)
+    Route::get('/{hash}', [CodeController::class, 'show']);
+    
+    // Обновление сниппета (требует токен)
+    Route::put('/{hash}', [CodeController::class, 'update']);
+    
+    // Удаление сниппета (требует токен)
+    Route::delete('/{hash}', [CodeController::class, 'destroy']);
+});
