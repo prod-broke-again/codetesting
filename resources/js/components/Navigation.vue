@@ -32,17 +32,6 @@
                         >
                             Главная
                         </router-link>
-                        <router-link
-                            to="/create"
-                            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                            :class="[
-                                $route.path === '/create' 
-                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
-                                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-                            ]"
-                        >
-                            Создать
-                        </router-link>
                     </div>
                 </div>
 

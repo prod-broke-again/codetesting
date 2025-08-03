@@ -1,21 +1,13 @@
 {
-  "_Navigation.vue_vue_type_script_setup_true_lang-DG6Prznd.js": {
-    "file": "assets/Navigation.vue_vue_type_script_setup_true_lang-DG6Prznd.js",
+  "_Navigation.vue_vue_type_script_setup_true_lang-BL1mxPDr.js": {
+    "file": "assets/Navigation.vue_vue_type_script_setup_true_lang-BL1mxPDr.js",
     "name": "Navigation.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
-  "_index-BG5Ynpes.js": {
-    "file": "assets/index-BG5Ynpes.js",
-    "name": "index"
-  },
-  "_languageDetector-BLh69cU_.js": {
-    "file": "assets/languageDetector-BLh69cU_.js",
-    "name": "languageDetector"
-  },
   "resources/css/app.css": {
-    "file": "assets/app-D4-20tBN.css",
+    "file": "assets/app-QOVx8-Yp.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -23,19 +15,18 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-fnbxaDK7.js",
+    "file": "assets/app-BceAFdgG.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/pages/Auth/Auth.vue",
-      "resources/js/pages/CodeCreate.vue",
       "resources/js/pages/CodeView.vue",
       "resources/js/pages/Home.vue"
     ]
   },
   "resources/js/pages/Auth/Auth.vue": {
-    "file": "assets/Auth-C6iZdxwu.js",
+    "file": "assets/Auth-Ch3TxM6X.js",
     "name": "Auth",
     "src": "resources/js/pages/Auth/Auth.vue",
     "isDynamicEntry": true,
@@ -43,38 +34,24 @@
       "resources/js/app.ts"
     ]
   },
-  "resources/js/pages/CodeCreate.vue": {
-    "file": "assets/CodeCreate-CcmKckhK.js",
-    "name": "CodeCreate",
-    "src": "resources/js/pages/CodeCreate.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.ts",
-      "_index-BG5Ynpes.js",
-      "_languageDetector-BLh69cU_.js"
-    ]
-  },
   "resources/js/pages/CodeView.vue": {
-    "file": "assets/CodeView-CI3Ule9j.js",
+    "file": "assets/CodeView-VVWkocR6.js",
     "name": "CodeView",
     "src": "resources/js/pages/CodeView.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_index-BG5Ynpes.js",
-      "_Navigation.vue_vue_type_script_setup_true_lang-DG6Prznd.js",
+      "_Navigation.vue_vue_type_script_setup_true_lang-BL1mxPDr.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/Home.vue": {
-    "file": "assets/Home-6n_szqSt.js",
+    "file": "assets/Home-BpQ3x7Xw.js",
     "name": "Home",
     "src": "resources/js/pages/Home.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_index-BG5Ynpes.js",
-      "_languageDetector-BLh69cU_.js",
-      "_Navigation.vue_vue_type_script_setup_true_lang-DG6Prznd.js"
+      "_Navigation.vue_vue_type_script_setup_true_lang-BL1mxPDr.js"
     ]
   }
 }

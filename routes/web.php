@@ -17,11 +17,8 @@ use App\Http\Controllers\Auth\SocialiteController;
 |
 */
 
-// Главная страница
+// Главная страница (создание сниппета)
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Создание сниппета
-Route::get('/create', [CodeController::class, 'create'])->name('code.create');
 
 // Просмотр сниппета
 Route::get('/code/{hash}', [CodeController::class, 'show'])->name('code.show');

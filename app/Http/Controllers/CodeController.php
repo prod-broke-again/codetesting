@@ -9,17 +9,6 @@ use Inertia\Inertia;
 class CodeController extends Controller
 {
     /**
-     * Показать страницу создания сниппета
-     */
-    public function create()
-    {
-        return Inertia::render('CodeCreate', [
-            'title' => 'Создать новый сниппет',
-            'description' => 'Расширенные настройки для создания сниппета'
-        ]);
-    }
-
-    /**
      * Показать страницу просмотра сниппета
      */
     public function show(string $hash)
