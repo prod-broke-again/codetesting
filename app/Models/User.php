@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'github_id',
+        'avatar',
+        'email_verified_at',
     ];
 
     /**
@@ -45,5 +49,38 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Получить сниппеты пользователя
+     */
+    public function codes()
+    {
+        return $this->hasMany(Code::class);
+    }
+
+    /**
+     * Получить fingerprints пользователя
+     */
+    public function fingerprints()
+    {
+        return $this->hasMany(Fingerprint::class);
+    }
+
+    /**
+     * Проверить, является ли пользователь гостем
+     */
+    public function isGuest(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Проверить, имеет ли пользователь премиум доступ
+     */
+    public function hasPremiumAccess(): bool
+    {
+        // TODO: Реализовать логику премиум доступа
+        return false;
     }
 }
