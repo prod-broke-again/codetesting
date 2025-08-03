@@ -5,7 +5,7 @@
                 <!-- Логотип -->
                 <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
-                        <router-link to="/" class="flex items-center space-x-2">
+                        <a href="/" class="flex items-center space-x-2">
                             <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -14,24 +14,24 @@
                             <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 CodeTesting.ru
                             </span>
-                        </router-link>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Центральная навигация -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <router-link
-                            to="/"
+                        <a
+                            href="/"
                             class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                             :class="[
-                                $route.path === '/' 
+                                $page.url === '/' 
                                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
                                     : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                             ]"
                         >
                             Главная
-                        </router-link>
+                        </a>
                     </div>
                 </div>
 
@@ -42,18 +42,18 @@
                     
                     <!-- Кнопки авторизации -->
                     <div v-if="!isAuthenticated" class="flex items-center space-x-2">
-                        <router-link
-                            to="/auth"
+                        <a
+                            href="/auth"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                         >
                             Войти
-                        </router-link>
-                        <router-link
-                            to="/auth"
+                        </a>
+                        <a
+                            href="/auth"
                             class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                         >
                             Регистрация
-                        </router-link>
+                        </a>
                     </div>
 
                     <!-- Профиль пользователя -->
@@ -90,24 +90,24 @@
                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
                         >
                             <div class="py-1">
-                                <router-link
-                                    to="/dashboard"
+                                <a
+                                    href="/dashboard"
                                     class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
                                 >
                                     <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                                     </svg>
                                     Дашборд
-                                </router-link>
-                                <router-link
-                                    to="/profile"
+                                </a>
+                                <a
+                                    href="/profile"
                                     class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
                                 >
                                     <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                     </svg>
                                     Профиль
-                                </router-link>
+                                </a>
                                 <hr class="my-1 border-gray-200 dark:border-gray-700" />
                                 <button
                                     @click="logout"
@@ -129,7 +129,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import ThemeToggle from './ThemeToggle.vue';
 
 interface User {
@@ -145,6 +145,7 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+const page = usePage();
 const isUserMenuOpen = ref(false);
 
 const isAuthenticated = computed(() => {
