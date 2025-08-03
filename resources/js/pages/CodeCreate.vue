@@ -2,10 +2,10 @@
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                Создать новый сниппет
+                {{ title }}
             </h1>
             <p class="text-xl text-gray-600">
-                Расширенные настройки для создания сниппета
+                {{ description }}
             </p>
         </div>
 
@@ -147,6 +147,14 @@ import { router } from '@inertiajs/vue3';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
+
+// Props от Inertia.js
+interface Props {
+    title: string;
+    description: string;
+}
+
+const props = defineProps<Props>();
 
 const isLoading = ref<boolean>(false);
 const detectionConfidence = ref<number>(0);

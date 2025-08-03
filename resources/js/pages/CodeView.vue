@@ -1,19 +1,11 @@
 <template>
     <div class="max-w-4xl mx-auto">
-        <div v-if="isLoading" class="text-center py-8">
+        <div v-if="!snippet" class="text-center py-8">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p class="mt-4 text-gray-600">Загрузка сниппета...</p>
         </div>
 
-        <div v-else-if="error" class="text-center py-8">
-            <div class="text-red-600 text-xl mb-4">Ошибка загрузки</div>
-            <p class="text-gray-600">{{ error }}</p>
-            <button @click="loadSnippet" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Попробовать снова
-            </button>
-        </div>
-
-        <div v-else-if="snippet" class="bg-white rounded-lg shadow-md">
+        <div v-else class="bg-white rounded-lg shadow-md">
             <!-- Заголовок -->
             <div class="border-b border-gray-200 px-6 py-4">
                 <div class="flex items-center justify-between">
@@ -59,41 +51,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import type { CodeSnippet } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 
 // Props от Inertia.js
 interface Props {
     hash: string;
+    snippet: CodeSnippet;
 }
 
 const props = defineProps<Props>();
-
-const snippet = ref<CodeSnippet | null>(null);
-const isLoading = ref<boolean>(true);
-const error = ref<string | null>(null);
-
-const loadSnippet = async () => {
-    isLoading.value = true;
-    error.value = null;
-    
-    try {
-        const response = await fetch(`/api/codes/${props.hash}`);
-        
-        if (response.ok) {
-            const data = await response.json();
-            snippet.value = data.data;
-        } else {
-            error.value = 'Сниппет не найден или недоступен';
-        }
-    } catch (err) {
-        error.value = 'Ошибка загрузки сниппета';
-        console.error('Error:', err);
-    } finally {
-        isLoading.value = false;
-    }
-};
 
 const getLanguageName = (language: string): string => {
     return LANGUAGE_OPTIONS[language as keyof typeof LANGUAGE_OPTIONS] || language;
@@ -108,13 +75,11 @@ const formatDate = (dateString: string): string => {
 };
 
 const copyCode = async () => {
-    if (snippet.value) {
-        try {
-            await navigator.clipboard.writeText(snippet.value.content);
-            alert('Код скопирован в буфер обмена');
-        } catch (err) {
-            console.error('Ошибка копирования:', err);
-        }
+    try {
+        await navigator.clipboard.writeText(props.snippet.content);
+        alert('Код скопирован в буфер обмена');
+    } catch (err) {
+        console.error('Ошибка копирования:', err);
     }
 };
 
@@ -126,8 +91,4 @@ const copyUrl = async () => {
         console.error('Ошибка копирования:', err);
     }
 };
-
-onMounted(() => {
-    loadSnippet();
-});
 </script> 

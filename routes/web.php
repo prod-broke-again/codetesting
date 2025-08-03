@@ -1,21 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CodeController;
 
 // Главная страница - создание сниппета
-Route::get('/', function () {
-    return Inertia::render('Home');
-});
+Route::get('/', [HomeController::class, 'index']);
 
 // Просмотр сниппета
-Route::get('/code/{hash}', function (string $hash) {
-    return Inertia::render('CodeView', [
-        'hash' => $hash
-    ]);
-});
+Route::get('/code/{hash}', [CodeController::class, 'show']);
 
 // Создание сниппета (отдельная страница)
-Route::get('/create', function () {
-    return Inertia::render('CodeCreate');
-});
+Route::get('/create', [CodeController::class, 'create']);
