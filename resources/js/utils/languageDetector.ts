@@ -153,7 +153,29 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /<img[^>]*>/,
         /<form[^>]*>/,
         /<input[^>]*>/,
-        /<button[^>]*>/
+        /<button[^>]*>/,
+        /<meta[^>]*>/,
+        /<title[^>]*>/,
+        /<link[^>]*>/,
+        /<script[^>]*>/,
+        /<style[^>]*>/,
+        /<nav[^>]*>/,
+        /<header[^>]*>/,
+        /<footer[^>]*>/,
+        /<main[^>]*>/,
+        /<section[^>]*>/,
+        /<article[^>]*>/,
+        /<aside[^>]*>/,
+        /<ul[^>]*>/,
+        /<ol[^>]*>/,
+        /<li[^>]*>/,
+        /<table[^>]*>/,
+        /<tr[^>]*>/,
+        /<td[^>]*>/,
+        /<th[^>]*>/,
+        /<thead[^>]*>/,
+        /<tbody[^>]*>/,
+        /<tfoot[^>]*>/
     ],
     'css': [
         /{[^}]*}/,
@@ -228,7 +250,48 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /@section\s*\(/,
         /@yield\s*\(/,
         /{{.*?}}/,
-        /{!!.*?!!}/
+        /{!!.*?!!}/,
+        /@vite\(/,
+        /@csrf/,
+        /@method/,
+        /@error/,
+        /@auth/,
+        /@guest/,
+        /@config\(/,
+        /@app\(/,
+        /@env\(/,
+        /@lang\(/,
+        /@choice\(/,
+        /@can\(/,
+        /@cannot\(/,
+        /@hasSection\(/,
+        /@hasAny\(/,
+        /@unless\(/,
+        /@empty\(/,
+        /@endempty/,
+        /@isset\(/,
+        /@endisset/,
+        /@unset\(/,
+        /@endunset/,
+        /@production/,
+        /@endproduction/,
+        /@env\(/,
+        /@endenv/,
+        /@push\(/,
+        /@endpush/,
+        /@stack\(/,
+        /@prepend\(/,
+        /@endprepend/,
+        /@inject\(/,
+        /@component\(/,
+        /@endcomponent/,
+        /@slot\(/,
+        /@endslot/,
+        /@props\(/,
+        /@once/,
+        /@endonce/,
+        /@verbatim/,
+        /@endverbatim/
     ],
     'jsx': [
         /import\s+React/,
@@ -309,6 +372,12 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /@yield\s*\(/,
         /{{.*?}}/,
         /{!!.*?!!}/,
+        /@vite\(/,
+        /@csrf/,
+        /@method/,
+        /@error/,
+        /@auth/,
+        /@guest/,
         /<\?php/,
         /<\?=/,
         /function\s+\w+\s*\(/,
@@ -543,10 +612,10 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
 
 // Веса для разных типов паттернов
 const PATTERN_WEIGHTS = {
-    EXACT_MATCH: 10,
-    STRONG_PATTERN: 5,
-    MEDIUM_PATTERN: 3,
-    WEAK_PATTERN: 1
+    EXACT_MATCH: 15,
+    STRONG_PATTERN: 8,
+    MEDIUM_PATTERN: 5,
+    WEAK_PATTERN: 2
 };
 
 // Функция для анализа кода и определения языка
@@ -589,24 +658,56 @@ export function detectLanguage(code: string): ProgrammingLanguage {
         });
     });
 
-    // Анализируем весь код целиком для смешанных типов
-    const fullCode = code;
+    // Специальная проверка для Blade синтаксиса в целом коде
+    const bladePatterns = [
+        /\{\{.*?\}\}/g,  // {{ }}
+        /\{!!.*?!!\}/g,  // {!! !!}
+        /@[a-zA-Z_]\w*\s*\(/g,  // @directive()
+        /@[a-zA-Z_]\w*/g  // @directive
+    ];
     
+    bladePatterns.forEach(pattern => {
+        const matches = code.match(pattern);
+        if (matches) {
+            scores['blade'] += matches.length * 10;
+            scores['php-blade'] += matches.length * 12;
+        }
+    });
+
     // Специальная логика для смешанных типов
     if (scores['php'] > 0 && scores['html'] > 0) {
-        scores['php-html'] += Math.max(scores['php'], scores['html']) + 5;
+        scores['php-html'] += Math.max(scores['php'], scores['html']) + 10;
     }
     
     if (scores['html'] > 0 && scores['css'] > 0) {
-        scores['html-css'] += Math.max(scores['html'], scores['css']) + 3;
+        scores['html-css'] += Math.max(scores['html'], scores['css']) + 8;
     }
     
     if (scores['html'] > 0 && scores['javascript'] > 0) {
-        scores['html-js'] += Math.max(scores['html'], scores['javascript']) + 3;
+        scores['html-js'] += Math.max(scores['html'], scores['javascript']) + 8;
     }
     
     if (scores['php'] > 0 && scores['blade'] > 0) {
-        scores['php-blade'] += Math.max(scores['php'], scores['blade']) + 5;
+        scores['php-blade'] += Math.max(scores['php'], scores['blade']) + 15;
+    }
+
+    // Приоритет для HTML - если есть явные HTML теги, увеличиваем вес
+    if (scores['html'] > 0) {
+        const htmlTags = ['<!DOCTYPE', '<html', '<head', '<body', '<div', '<span', '<p', '<h1', '<h2', '<h3', '<h4', '<h5', '<h6'];
+        const hasHtmlTags = htmlTags.some(tag => code.includes(tag));
+        if (hasHtmlTags) {
+            scores['html'] += 20; // Значительно увеличиваем вес HTML
+        }
+    }
+
+    // Приоритет для Blade - если есть Blade директивы, увеличиваем вес
+    if (scores['blade'] > 0) {
+        const bladeDirectives = ['@if', '@foreach', '@for', '@while', '@switch', '@include', '@extends', '@section', '@yield', '@vite', '@csrf', '@config', '@app', '@env', '@lang', '@choice', '@can', '@cannot', '@hasSection', '@hasAny', '@unless', '@empty', '@endempty', '@isset', '@endisset', '@unset', '@endunset', '@production', '@endproduction', '@push', '@endpush', '@stack', '@prepend', '@endprepend', '@inject', '@component', '@endcomponent', '@slot', '@endslot', '@props', '@once', '@endonce', '@verbatim', '@endverbatim'];
+        const hasBladeDirectives = bladeDirectives.some(directive => code.includes(directive));
+        if (hasBladeDirectives) {
+            scores['blade'] += 50; // Очень высокий приоритет для Blade
+            scores['php-blade'] += 60; // Еще выше для php-blade
+        }
     }
 
     // Находим язык с максимальным счетом
@@ -671,8 +772,8 @@ export function getDetectionConfidence(code: string, detectedLanguage: Programmi
     // Вычисляем уверенность как процент от максимального счета
     const confidence = (detectedScore / maxScore) * 100;
     
-    // Минимальная уверенность 20%, максимальная 95%
-    return Math.max(20, Math.min(95, confidence));
+    // Минимальная уверенность 30%, максимальная 95%
+    return Math.max(30, Math.min(95, confidence));
 }
 
 // Функция для получения альтернативных языков

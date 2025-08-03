@@ -3,8 +3,8 @@
     "file": "assets/index-BG5Ynpes.js",
     "name": "index"
   },
-  "_languageDetector-BO8hPkXD.js": {
-    "file": "assets/languageDetector-BO8hPkXD.js",
+  "_languageDetector-DRvYRbdZ.js": {
+    "file": "assets/languageDetector-DRvYRbdZ.js",
     "name": "languageDetector"
   },
   "resources/css/app.css": {
@@ -16,7 +16,7 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-D40RM7se.js",
+    "file": "assets/app-CXQzwbbV.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -30,18 +30,18 @@
     ]
   },
   "resources/js/pages/CodeCreate.vue": {
-    "file": "assets/CodeCreate-Dt6cltAA.js",
+    "file": "assets/CodeCreate-C3cLoiq_.js",
     "name": "CodeCreate",
     "src": "resources/js/pages/CodeCreate.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_index-BG5Ynpes.js",
-      "_languageDetector-BO8hPkXD.js"
+      "_languageDetector-DRvYRbdZ.js"
     ]
   },
   "resources/js/pages/CodeView.vue": {
-    "file": "assets/CodeView-BuRjLnOe.js",
+    "file": "assets/CodeView-BfWscnTF.js",
     "name": "CodeView",
     "src": "resources/js/pages/CodeView.vue",
     "isDynamicEntry": true,
@@ -51,14 +51,14 @@
     ]
   },
   "resources/js/pages/Home.vue": {
-    "file": "assets/Home-BfbMp_pA.js",
+    "file": "assets/Home-BPRcfk3z.js",
     "name": "Home",
     "src": "resources/js/pages/Home.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_index-BG5Ynpes.js",
-      "_languageDetector-BO8hPkXD.js"
+      "_languageDetector-DRvYRbdZ.js"
     ]
   }
 }
