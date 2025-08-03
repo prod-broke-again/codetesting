@@ -115,9 +115,21 @@ const selectTheme = (theme: Theme) => {
     currentTheme.value = theme;
     isOpen.value = false;
     
-    // Применяем тему к документу
-    document.documentElement.className = `theme-${theme.key}`;
+    // Удаляем все существующие классы тем
+    document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-space', 'theme-fire');
+    
+    // Применяем новую тему
+    document.documentElement.classList.add(`theme-${theme.key}`);
+    
+    // Сохраняем в localStorage
     localStorage.setItem('theme', theme.key);
+    
+    // Добавляем класс dark для Tailwind, если это темная тема
+    if (theme.key === 'dark' || theme.key === 'space' || theme.key === 'fire') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
 };
 
 const handleClickOutside = (event: Event) => {

@@ -5,8 +5,180 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-/* Импорт тем */
-@import './themes.css';
+/* Теми */
+/* Светлая тема (по умолчанию) */
+.theme-light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --border-primary: #e2e8f0;
+    --border-secondary: #cbd5e1;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Темная тема */
+.theme-dark {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --accent-primary: #60a5fa;
+    --accent-secondary: #a78bfa;
+    --accent-success: #34d399;
+    --accent-warning: #fbbf24;
+    --accent-danger: #f87171;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+}
+
+/* Космическая тема */
+.theme-space {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #b8c5d6;
+    --text-muted: #6b7280;
+    --border-primary: #2d3748;
+    --border-secondary: #4a5568;
+    --accent-primary: #8b5cf6;
+    --accent-secondary: #ec4899;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(139 92 246 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(139 92 246 / 0.1), 0 2px 4px -2px rgb(139 92 246 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(139 92 246 / 0.1), 0 4px 6px -4px rgb(139 92 246 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(139 92 246 / 0.1), 0 8px 10px -6px rgb(139 92 246 / 0.1);
+}
+
+/* Огненная тема */
+.theme-fire {
+    --bg-primary: #1a0f0f;
+    --bg-secondary: #2d1b1b;
+    --bg-tertiary: #3d2525;
+    --text-primary: #ffffff;
+    --text-secondary: #f3e8e8;
+    --text-muted: #a8a8a8;
+    --border-primary: #4a2c2c;
+    --border-secondary: #5d3a3a;
+    --accent-primary: #f97316;
+    --accent-secondary: #ef4444;
+    --accent-success: #22c55e;
+    --accent-warning: #eab308;
+    --accent-danger: #dc2626;
+    --shadow-sm: 0 1px 2px 0 rgb(249 115 22 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(249 115 22 / 0.1), 0 2px 4px -2px rgb(249 115 22 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(249 115 22 / 0.1), 0 4px 6px -4px rgb(249 115 22 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(249 115 22 / 0.1), 0 8px 10px -6px rgb(249 115 22 / 0.1);
+}
+
+/* Применение переменных к элементам */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Градиенты для разных тем */
+.theme-light .gradient-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+.theme-dark .gradient-primary {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+}
+
+.theme-space .gradient-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+}
+
+.theme-fire .gradient-primary {
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+}
+
+/* Анимации для космической темы */
+.theme-space .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.theme-space .animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Эффекты для огненной темы */
+.theme-fire .animate-flicker {
+    animation: flicker 3s linear infinite;
+}
+
+@keyframes flicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Скругления для разных тем */
+.theme-light .rounded-theme {
+    border-radius: 12px;
+}
+
+.theme-dark .rounded-theme {
+    border-radius: 16px;
+}
+
+.theme-space .rounded-theme {
+    border-radius: 20px;
+}
+
+.theme-fire .rounded-theme {
+    border-radius: 8px;
+}
+
+/* Тени для разных тем */
+.theme-light .shadow-theme {
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-dark .shadow-theme {
+    box-shadow: var(--shadow-xl);
+}
+
+.theme-space .shadow-theme {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.theme-fire .shadow-theme {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
 
 /* Кастомные стили */
 @layer base {
@@ -79,15 +251,6 @@
 }
 
 /* Анимации */
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
 @keyframes glow {
     from {
         box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
