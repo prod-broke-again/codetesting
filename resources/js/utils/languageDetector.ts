@@ -175,8 +175,39 @@ const LANGUAGE_PATTERNS: Record<ProgrammingLanguage, RegExp[]> = {
         /:\s*VNodeSlotSuspense/,
         /:\s*VNodeSlotKeepAlive/,
         /:\s*VNodeSlotTransition/,
-        /:\s*VNodeSlotTransitionGroup/
-    ],
+                 /:\s*VNodeSlotTransitionGroup/,
+         /import\s+type\s+\w+/,
+         /export\s+type\s+\w+/,
+         /export\s+interface\s+\w+/,
+         /export\s+enum\s+\w+/,
+         /declare\s+module\s+['"][^'"]*['"]/,
+         /declare\s+namespace\s+\w+/,
+         /declare\s+function\s+\w+/,
+         /declare\s+const\s+\w+/,
+         /declare\s+class\s+\w+/,
+         /declare\s+interface\s+\w+/,
+         /declare\s+type\s+\w+/,
+         /declare\s+enum\s+\w+/,
+         /declare\s+var\s+\w+/,
+         /declare\s+let\s+\w+/,
+         /declare\s+global/,
+         /declare\s+export/,
+         /declare\s+import/,
+         /declare\s+require/,
+         /declare\s+module\.exports/,
+         /declare\s+exports/,
+         /declare\s+__dirname/,
+         /declare\s+__filename/,
+         /declare\s+process/,
+         /declare\s+Buffer/,
+         /declare\s+console/,
+         /declare\s+setTimeout/,
+         /declare\s+setInterval/,
+         /declare\s+clearTimeout/,
+         /declare\s+clearInterval/,
+         /declare\s+setImmediate/,
+         /declare\s+clearImmediate/
+     ],
     'python': [
         /def\s+\w+\s*\(/,
         /import\s+/,
@@ -893,22 +924,30 @@ export function detectLanguage(code: string): ProgrammingLanguage {
         const typescriptPatterns = ['interface', 'type', 'import type', 'export type', 'export interface', 'export enum', 'declare', 'as', 'implements', 'extends', 'readonly', 'private', 'public', 'protected', 'RouteRecordRaw', 'createApp', 'createPinia', 'createRouter', 'createWebHistory'];
         const hasTypeScriptPatterns = typescriptPatterns.some(pattern => code.includes(pattern));
         if (hasTypeScriptPatterns) {
-            scores['typescript'] += 60; // Очень высокий приоритет для TypeScript
-            // Уменьшаем вес Elixir если есть TypeScript паттерны
+            scores['typescript'] += 100; // Очень высокий приоритет для TypeScript
+            // Полностью подавляем Elixir если есть TypeScript паттерны
             if (scores['elixir'] > 0) {
-                scores['elixir'] = Math.max(0, scores['elixir'] - 30);
+                scores['elixir'] = 0;
             }
         }
     }
 
     // Специальная проверка для Vue/TypeScript кода
     if (code.includes('import') && code.includes('from') && (code.includes('vue') || code.includes('pinia') || code.includes('router'))) {
-        scores['typescript'] += 50;
-        scores['javascript'] += 30;
-        // Уменьшаем вес Elixir для Vue/TypeScript кода
+        scores['typescript'] += 80;
+        scores['javascript'] += 40;
+        // Полностью подавляем Elixir для Vue/TypeScript кода
         if (scores['elixir'] > 0) {
-            scores['elixir'] = Math.max(0, scores['elixir'] - 40);
+            scores['elixir'] = 0;
         }
+    }
+
+    // Дополнительная проверка для TypeScript файлов
+    if (code.includes('import') && code.includes('from') && (code.includes('vue') || code.includes('pinia') || code.includes('router') || code.includes('@/'))) {
+        scores['typescript'] += 120;
+        scores['javascript'] += 60;
+        // Полностью подавляем Elixir для TypeScript файлов
+        scores['elixir'] = 0;
     }
 
     // Находим язык с максимальным счетом
