@@ -111,22 +111,22 @@
                             >
                                 <MenuItems class="user-dropdown">
                                     <MenuItem v-slot="{ active }">
-                                        <a href="/dashboard" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                        <button @click="router.visit('/dashboard')" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
                                             <ChartBarIcon class="dropdown-icon" />
                                             Дашборд
-                                        </a>
+                                        </button>
                                     </MenuItem>
                                     <MenuItem v-slot="{ active }">
-                                        <a href="/my-snippets" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                        <button @click="router.visit('/my-snippets')" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
                                             <CodeBracketIcon class="dropdown-icon" />
                                             Мои сниппеты
-                                        </a>
+                                        </button>
                                     </MenuItem>
                                     <MenuItem v-slot="{ active }">
-                                        <a href="/profile" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                        <button @click="router.visit('/profile')" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
                                             <UserIcon class="dropdown-icon" />
                                             Профиль
-                                        </a>
+                                        </button>
                                     </MenuItem>
                                     <div class="dropdown-divider"></div>
                                     <MenuItem v-slot="{ active }">
@@ -544,10 +544,17 @@ onUnmounted(() => {
     border: none;
     cursor: pointer;
     text-align: left;
+    font-family: inherit;
 }
 
 .dropdown-item:hover,
 .dropdown-item-active {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.dropdown-item:focus {
+    outline: none;
     background-color: var(--color-border);
     color: var(--color-text);
 }
