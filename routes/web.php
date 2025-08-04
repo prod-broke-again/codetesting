@@ -6,6 +6,7 @@ use App\Http\Controllers\CodeController;
 use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\MySnippetsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialiteController;
 
@@ -31,6 +32,11 @@ Route::get('/my-snippets', [MySnippetsController::class, 'index'])->name('my-sni
 
 // Дашборд (требует авторизации)
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// Профиль пользователя (требует авторизации)
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 // Просмотр сниппета
 Route::get('/code/{hash}', [CodeController::class, 'show'])->name('code.show');

@@ -84,58 +84,62 @@
                         </a>
                     </div>
 
-                    <!-- Профиль пользователя -->
-                    <div v-else class="user-menu">
-                        <button @click="toggleUserMenu" class="user-button">
-                            <img
-                                v-if="user?.avatar"
-                                :src="user.avatar"
-                                :alt="user.name"
-                                class="user-avatar"
-                            />
-                            <div v-else class="user-avatar-placeholder">
-                                <span class="user-avatar-text">
-                                    {{ user?.name?.charAt(0)?.toUpperCase() }}
-                                </span>
-                            </div>
-                            <span class="user-name">
-                                {{ user?.name }}
-                            </span>
-                            <svg class="user-arrow" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+                    <!-- Пользовательское меню -->
+                    <div v-if="user" class="user-menu">
+                        <Menu as="div" class="relative">
+                            <MenuButton class="user-button">
+                                <img 
+                                    v-if="user.avatar" 
+                                    :src="user.avatar" 
+                                    :alt="user.name"
+                                    class="user-avatar"
+                                />
+                                <div v-else class="user-avatar-placeholder">
+                                    {{ user.name.charAt(0).toUpperCase() }}
+                                </div>
+                                <span class="user-name">{{ user.name }}</span>
+                                <ChevronDownIcon class="user-dropdown-icon" />
+                            </MenuButton>
 
-                        <!-- Выпадающее меню пользователя -->
-                        <div v-if="isUserMenuOpen" class="user-dropdown">
-                            <div class="dropdown-content">
-                                <a href="/dashboard" class="dropdown-item">
-                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                                    </svg>
-                                    Дашборд
-                                </a>
-                                <a href="/profile" class="dropdown-item">
-                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                    </svg>
-                                    Профиль
-                                </a>
-                                <a href="/settings" class="dropdown-item">
-                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                                    </svg>
-                                    Настройки
-                                </a>
-                                <hr class="dropdown-divider" />
-                                <button @click="logout" class="dropdown-item dropdown-item-danger">
-                                    <svg class="dropdown-icon" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
-                                    </svg>
-                                    Выйти
-                                </button>
-                            </div>
-                        </div>
+                            <transition
+                                enter-active-class="transition ease-out duration-100"
+                                enter-from-class="transform opacity-0 scale-95"
+                                enter-to-class="transform opacity-100 scale-100"
+                                leave-active-class="transition ease-in duration-75"
+                                leave-from-class="transform opacity-100 scale-100"
+                                leave-to-class="transform opacity-0 scale-95"
+                            >
+                                <MenuItems class="user-dropdown">
+                                    <MenuItem v-slot="{ active }">
+                                        <a href="/dashboard" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                            <ChartBarIcon class="dropdown-icon" />
+                                            Дашборд
+                                        </a>
+                                    </MenuItem>
+                                    <MenuItem v-slot="{ active }">
+                                        <a href="/my-snippets" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                            <CodeBracketIcon class="dropdown-icon" />
+                                            Мои сниппеты
+                                        </a>
+                                    </MenuItem>
+                                    <MenuItem v-slot="{ active }">
+                                        <a href="/profile" :class="[active ? 'dropdown-item-active' : 'dropdown-item']">
+                                            <UserIcon class="dropdown-icon" />
+                                            Профиль
+                                        </a>
+                                    </MenuItem>
+                                    <div class="dropdown-divider"></div>
+                                    <MenuItem v-slot="{ active }">
+                                        <form @submit.prevent="logout" class="w-full">
+                                            <button type="submit" :class="[active ? 'dropdown-item-active' : 'dropdown-item', 'w-full text-left']">
+                                                <ArrowRightOnRectangleIcon class="dropdown-icon" />
+                                                Выйти
+                                            </button>
+                                        </form>
+                                    </MenuItem>
+                                </MenuItems>
+                            </transition>
+                        </Menu>
                     </div>
                 </div>
             </div>
@@ -147,6 +151,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import ThemeToggle from './ThemeToggle.vue';
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+import { ChevronDownIcon, ChartBarIcon, CodeBracketIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
 
 interface User {
     id: number;
