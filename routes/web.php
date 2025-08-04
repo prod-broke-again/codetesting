@@ -44,8 +44,10 @@ Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.r
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // Socialite маршруты
-Route::get('/auth/{provider}', [SocialiteController::class, 'redirect'])->name('auth.socialite.redirect');
-Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('auth.socialite.callback');
+Route::get('/auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+Route::get('/auth/github', [SocialiteController::class, 'redirectToGithub'])->name('auth.github');
+Route::get('/auth/github/callback', [SocialiteController::class, 'handleGithubCallback'])->name('auth.github.callback');
 
 // API маршруты для сниппетов
 Route::prefix('api')->group(function () {

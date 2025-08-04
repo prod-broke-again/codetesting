@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -26,7 +25,7 @@ class SocialiteController extends Controller
     /**
      * Обработать callback от Google
      */
-    public function handleGoogleCallback(Request $request): JsonResponse
+    public function handleGoogleCallback(Request $request)
     {
         try {
             $socialiteUser = Socialite::driver('google')->user();
@@ -39,26 +38,14 @@ class SocialiteController extends Controller
                 $this->authService->linkFingerprintToUser($fingerprintHash, $user);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Вход через Google выполнен успешно!',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'avatar' => $user->avatar,
-                ]
-            ]);
+            return redirect()->intended('/dashboard')->with('message', 'Вход через Google выполнен успешно!');
 
         } catch (\Exception $e) {
             Log::error('Ошибка входа через Google', [
                 'error' => $e->getMessage()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка входа через Google'
-            ], 500);
+            return redirect('/auth')->withErrors(['email' => 'Ошибка входа через Google']);
         }
     }
 
@@ -73,7 +60,7 @@ class SocialiteController extends Controller
     /**
      * Обработать callback от GitHub
      */
-    public function handleGithubCallback(Request $request): JsonResponse
+    public function handleGithubCallback(Request $request)
     {
         try {
             $socialiteUser = Socialite::driver('github')->user();
@@ -86,33 +73,21 @@ class SocialiteController extends Controller
                 $this->authService->linkFingerprintToUser($fingerprintHash, $user);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Вход через GitHub выполнен успешно!',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'avatar' => $user->avatar,
-                ]
-            ]);
+            return redirect()->intended('/dashboard')->with('message', 'Вход через GitHub выполнен успешно!');
 
         } catch (\Exception $e) {
             Log::error('Ошибка входа через GitHub', [
                 'error' => $e->getMessage()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка входа через GitHub'
-            ], 500);
+            return redirect('/auth')->withErrors(['email' => 'Ошибка входа через GitHub']);
         }
     }
 
     /**
      * Получить связанные сниппеты по fingerprint
      */
-    public function getRelatedSnippets(Request $request): JsonResponse
+    public function getRelatedSnippets(Request $request)
     {
         try {
             $fingerprintHash = $request->header('X-Fingerprint');
