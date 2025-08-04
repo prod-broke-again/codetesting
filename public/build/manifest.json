@@ -1,21 +1,25 @@
 {
-  "_Footer-BS3qryJN.js": {
-    "file": "assets/Footer-BS3qryJN.js",
+  "_Footer-C_DIhUpC.css": {
+    "file": "assets/Footer-C_DIhUpC.css",
+    "src": "_Footer-C_DIhUpC.css"
+  },
+  "_Footer-CklmPi-c.js": {
+    "file": "assets/Footer-CklmPi-c.js",
     "name": "Footer",
     "imports": [
       "resources/js/app.ts",
-      "_Navigation-BAr4ZcT1.js"
+      "_Navigation-UmGpIFMD.js"
     ],
     "css": [
       "assets/Footer-C_DIhUpC.css"
     ]
   },
-  "_Footer-C_DIhUpC.css": {
-    "file": "assets/Footer-C_DIhUpC.css",
-    "src": "_Footer-C_DIhUpC.css"
+  "_Navigation-CoetW4Fv.css": {
+    "file": "assets/Navigation-CoetW4Fv.css",
+    "src": "_Navigation-CoetW4Fv.css"
   },
-  "_Navigation-BAr4ZcT1.js": {
-    "file": "assets/Navigation-BAr4ZcT1.js",
+  "_Navigation-UmGpIFMD.js": {
+    "file": "assets/Navigation-UmGpIFMD.js",
     "name": "Navigation",
     "imports": [
       "resources/js/app.ts",
@@ -25,12 +29,8 @@
       "assets/Navigation-CoetW4Fv.css"
     ]
   },
-  "_Navigation-CoetW4Fv.css": {
-    "file": "assets/Navigation-CoetW4Fv.css",
-    "src": "_Navigation-CoetW4Fv.css"
-  },
   "resources/css/app.css": {
-    "file": "assets/app-DCUJxo2W.css",
+    "file": "assets/app-BYCcMv2c.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -38,20 +38,22 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CBvY2IDp.js",
+    "file": "assets/app-CR1qHSPa.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/pages/Auth/Auth.vue",
       "resources/js/pages/CodeView.vue",
+      "resources/js/pages/Dashboard.vue",
       "resources/js/pages/Explore.vue",
       "resources/js/pages/Home.vue",
+      "resources/js/pages/MySnippets.vue",
       "resources/js/stores/theme.ts"
     ]
   },
   "resources/js/pages/Auth/Auth.vue": {
-    "file": "assets/Auth-BXHQwjG_.js",
+    "file": "assets/Auth-DF9NZy7f.js",
     "name": "Auth",
     "src": "resources/js/pages/Auth/Auth.vue",
     "isDynamicEntry": true,
@@ -60,25 +62,40 @@
     ]
   },
   "resources/js/pages/CodeView.vue": {
-    "file": "assets/CodeView-DyQGy1Dy.js",
+    "file": "assets/CodeView-eqVgDndG.js",
     "name": "CodeView",
     "src": "resources/js/pages/CodeView.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Navigation-BAr4ZcT1.js",
+      "_Navigation-UmGpIFMD.js",
       "resources/js/app.ts",
       "resources/js/stores/theme.ts"
     ]
   },
+  "resources/js/pages/Dashboard.vue": {
+    "file": "assets/Dashboard-C1D1gbFM.js",
+    "name": "Dashboard",
+    "src": "resources/js/pages/Dashboard.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_Navigation-UmGpIFMD.js",
+      "_Footer-CklmPi-c.js",
+      "resources/js/app.ts",
+      "resources/js/stores/theme.ts"
+    ],
+    "css": [
+      "assets/Dashboard-DErswiAb.css"
+    ]
+  },
   "resources/js/pages/Explore.vue": {
-    "file": "assets/Explore-CVIhDJNZ.js",
+    "file": "assets/Explore-D4_moE6t.js",
     "name": "Explore",
     "src": "resources/js/pages/Explore.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_Navigation-BAr4ZcT1.js",
-      "_Footer-BS3qryJN.js",
+      "_Navigation-UmGpIFMD.js",
+      "_Footer-CklmPi-c.js",
       "resources/js/stores/theme.ts"
     ],
     "css": [
@@ -86,22 +103,37 @@
     ]
   },
   "resources/js/pages/Home.vue": {
-    "file": "assets/Home-DqosKeHv.js",
+    "file": "assets/Home-CcwqwxA0.js",
     "name": "Home",
     "src": "resources/js/pages/Home.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_Navigation-BAr4ZcT1.js",
-      "_Footer-BS3qryJN.js",
+      "_Navigation-UmGpIFMD.js",
+      "_Footer-CklmPi-c.js",
       "resources/js/stores/theme.ts"
     ],
     "css": [
       "assets/Home-kTv8UyJx.css"
     ]
   },
+  "resources/js/pages/MySnippets.vue": {
+    "file": "assets/MySnippets-YXG4bhxU.js",
+    "name": "MySnippets",
+    "src": "resources/js/pages/MySnippets.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_Navigation-UmGpIFMD.js",
+      "_Footer-CklmPi-c.js",
+      "resources/js/stores/theme.ts"
+    ],
+    "css": [
+      "assets/MySnippets-77hBJwxN.css"
+    ]
+  },
   "resources/js/stores/theme.ts": {
-    "file": "assets/theme-mjoNXxnv.js",
+    "file": "assets/theme-BW9dLMMW.js",
     "name": "theme",
     "src": "resources/js/stores/theme.ts",
     "isDynamicEntry": true,
