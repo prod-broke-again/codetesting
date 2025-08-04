@@ -19,7 +19,9 @@ class SocialiteController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->redirectUrl(config('services.google.redirect'))
+            ->redirect();
     }
 
     /**
@@ -28,7 +30,9 @@ class SocialiteController extends Controller
     public function handleGoogleCallback(Request $request)
     {
         try {
-            $socialiteUser = Socialite::driver('google')->user();
+            $socialiteUser = Socialite::driver('google')
+                ->redirectUrl(config('services.google.redirect'))
+                ->user();
             $user = $this->authService->createOrUpdateUserFromSocialite($socialiteUser, 'google');
             $this->authService->login($user);
 
@@ -54,7 +58,9 @@ class SocialiteController extends Controller
      */
     public function redirectToGithub()
     {
-        return Socialite::driver('github')->redirect();
+        return Socialite::driver('github')
+            ->redirectUrl(config('services.github.redirect'))
+            ->redirect();
     }
 
     /**
@@ -63,7 +69,9 @@ class SocialiteController extends Controller
     public function handleGithubCallback(Request $request)
     {
         try {
-            $socialiteUser = Socialite::driver('github')->user();
+            $socialiteUser = Socialite::driver('github')
+                ->redirectUrl(config('services.github.redirect'))
+                ->user();
             $user = $this->authService->createOrUpdateUserFromSocialite($socialiteUser, 'github');
             $this->authService->login($user);
 
