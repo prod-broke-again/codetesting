@@ -168,7 +168,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const page = usePage();
-const isUserMenuOpen = ref(false);
 const searchQuery = ref('');
 
 const isAuthenticated = computed(() => {
@@ -176,10 +175,6 @@ const isAuthenticated = computed(() => {
 });
 
 const user = computed(() => props.user);
-
-const toggleUserMenu = () => {
-    isUserMenuOpen.value = !isUserMenuOpen.value;
-};
 
 const onSearchInput = () => {
     // Debounce поиска
@@ -224,19 +219,11 @@ const logout = async () => {
     }
 };
 
-const handleClickOutside = (event: Event) => {
-    const target = event.target as Element;
-    if (!target.closest('.user-menu')) {
-        isUserMenuOpen.value = false;
-    }
-};
-
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
+    // Инициализация при необходимости
 });
 
 onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
     if (searchTimeout) {
         clearTimeout(searchTimeout);
     }
@@ -480,12 +467,13 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     transition: all 0.2s;
     background: none;
     border: none;
     cursor: pointer;
+    color: var(--color-text);
 }
 
 .user-button:hover {
@@ -496,16 +484,20 @@ onUnmounted(() => {
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 .user-avatar-placeholder {
     width: 2rem;
     height: 2rem;
-    background: var(--gradient-primary);
     border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .user-avatar-text {
@@ -520,12 +512,6 @@ onUnmounted(() => {
     color: var(--color-text);
 }
 
-.user-arrow {
-    width: 1rem;
-    height: 1rem;
-    color: var(--color-textSecondary);
-}
-
 .user-dropdown {
     position: absolute;
     right: 0;
@@ -536,10 +522,13 @@ onUnmounted(() => {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--color-border);
     z-index: 50;
+    padding: 0.25rem 0;
 }
 
-.dropdown-content {
-    padding: 0.25rem 0;
+.user-dropdown-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-textSecondary);
 }
 
 .dropdown-item {
@@ -557,28 +546,23 @@ onUnmounted(() => {
     text-align: left;
 }
 
-.dropdown-item:hover {
+.dropdown-item:hover,
+.dropdown-item-active {
     background-color: var(--color-border);
+    color: var(--color-text);
 }
 
 .dropdown-icon {
     width: 1rem;
     height: 1rem;
     margin-right: 0.75rem;
+    flex-shrink: 0;
 }
 
 .dropdown-divider {
     margin: 0.25rem 0;
     border: none;
     border-top: 1px solid var(--color-border);
-}
-
-.dropdown-item-danger {
-    color: var(--color-error);
-}
-
-.dropdown-item-danger:hover {
-    background-color: rgba(239, 68, 68, 0.1);
 }
 
 /* Мобильная адаптация */
