@@ -136,4 +136,47 @@ class CodeRepository implements CodeRepositoryInterface
         
         return $query->paginate($perPage);
     }
+
+    /**
+     * Получить общее количество просмотров сниппетов пользователя
+     */
+    public function getTotalViewsByUser(int $userId): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->sum('access_count');
+    }
+
+    /**
+     * Получить количество зашифрованных сниппетов пользователя
+     */
+    public function countEncryptedByUser(int $userId): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('is_encrypted', true)
+            ->count();
+    }
+
+    /**
+     * Получить последние сниппеты пользователя
+     */
+    public function getRecentByUser(int $userId, int $limit = 5): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Удалить все сниппеты пользователя
+     */
+    public function deleteAllByUser(int $userId): bool
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->delete();
+    }
 }

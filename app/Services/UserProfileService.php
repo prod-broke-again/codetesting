@@ -4,45 +4,63 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Code;
+use App\Repositories\UserRepository;
+use App\Repositories\CodeRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class UserProfileService
 {
+    public function __construct(
+        private UserRepository $userRepository,
+        private CodeRepository $codeRepository
+    ) {}
+
     /**
-     * Обновить профиль пользователя
+     * Получить статистику пользователя
      */
-    public function updateProfile(User $user, array $data): User
+    public function getUserStats(User $user): array
     {
-        // Обновляем основную информацию
-        $user->update([
-            'name' => $data['name'],
-            'email' => $data['email'],
-        ]);
-
-        // Обновляем пароль если указан
-        if (!empty($data['new_password'])) {
-            $this->updatePassword($user, $data);
-        }
-
-        return $user->fresh();
+        return [
+            'total_snippets' => $this->codeRepository->countByUser($user->id),
+            'public_snippets' => $this->codeRepository->countByUserAndPrivacy($user->id, 'public'),
+            'private_snippets' => $this->codeRepository->countByUserAndPrivacy($user->id, 'private'),
+            'unlisted_snippets' => $this->codeRepository->countByUserAndPrivacy($user->id, 'unlisted'),
+            'total_views' => $this->codeRepository->getTotalViewsByUser($user->id),
+            'encrypted_snippets' => $this->codeRepository->countEncryptedByUser($user->id),
+        ];
     }
 
     /**
-     * Обновить пароль пользователя
+     * Получить последние сниппеты пользователя
      */
-    private function updatePassword(User $user, array $data): void
+    public function getRecentSnippets(User $user, int $limit = 5): array
     {
-        // Проверяем текущий пароль, если он задан
-        if ($user->password && !Hash::check($data['current_password'] ?? '', $user->password)) {
-            throw ValidationException::withMessages([
-                'current_password' => ['Неверный текущий пароль']
-            ]);
+        return $this->codeRepository->getRecentByUser($user->id, $limit)->toArray();
+    }
+
+    /**
+     * Обновить профиль пользователя
+     */
+    public function updateProfile(User $user, array $data): bool
+    {
+        $updateData = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ];
+
+        // Обновляем пароль если указан
+        if (!empty($data['new_password'])) {
+            if (!$this->validateCurrentPassword($user, $data['current_password'])) {
+                throw ValidationException::withMessages([
+                    'current_password' => 'Неверный текущий пароль'
+                ]);
+            }
+            
+            $updateData['password'] = Hash::make($data['new_password']);
         }
 
-        $user->update([
-            'password' => Hash::make($data['new_password'])
-        ]);
+        return $this->userRepository->update($user->id, $updateData);
     }
 
     /**
@@ -50,26 +68,28 @@ class UserProfileService
      */
     public function deleteAccount(User $user, string $password): bool
     {
-        // Проверяем пароль
-        if (!Hash::check($password, $user->password)) {
+        if (!$this->validateCurrentPassword($user, $password)) {
             throw ValidationException::withMessages([
-                'password' => ['Неверный пароль']
+                'password' => 'Неверный пароль'
             ]);
         }
 
         // Удаляем все сниппеты пользователя
-        Code::where('user_id', $user->id)->delete();
+        $this->codeRepository->deleteAllByUser($user->id);
         
         // Удаляем пользователя
-        return $user->delete();
+        return $this->userRepository->delete($user->id);
     }
 
     /**
-     * Связать fingerprint с пользователем
+     * Проверить текущий пароль пользователя
      */
-    public function linkFingerprint(User $user, string $fingerprint): void
+    private function validateCurrentPassword(User $user, ?string $password): bool
     {
-        // Здесь можно добавить логику связывания fingerprint
-        // Пока оставляем пустым, так как это уже реализовано в AuthService
+        if (!$user->password) {
+            return true; // Пользователь без пароля (социальная авторизация)
+        }
+
+        return Hash::check($password, $user->password);
     }
 }
