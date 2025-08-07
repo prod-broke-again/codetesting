@@ -10,7 +10,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // API маршруты для сниппетов
-Route::prefix('codes')->group(function () {
+Route::prefix('snippets')->group(function () {
     // Создание сниппета (публичный доступ)
     Route::post('/', [CodeController::class, 'store']);
     

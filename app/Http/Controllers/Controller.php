@@ -2,76 +2,97 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ApiResponse;
+use App\Http\Resources\CodeResource;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-abstract class Controller
+abstract class Controller extends BaseController
 {
+    use AuthorizesRequests, ValidatesRequests;
+
     /**
-     * Возвращает успешный JSON ответ
+     * Успешный JSON ответ
      */
     protected function successResponse(
-        mixed $data = null, 
-        string $message = 'Success', 
+        array|CodeResource|null $data = null,
+        string $message = 'Success',
         int $status = 200
     ): JsonResponse {
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => $data
-        ], $status);
+        $response = ApiResponse::success($message, $data, $status);
+        return $response->toResponse(request());
     }
 
     /**
-     * Возвращает JSON ответ с ошибкой
+     * Ошибка JSON ответ
      */
     protected function errorResponse(
-        string $message = 'Error', 
-        int $status = 400, 
-        mixed $errors = null
+        string $message = 'Error',
+        int $status = 400,
+        array|null $errors = null
     ): JsonResponse {
-        $response = [
-            'success' => false,
-            'message' => $message
-        ];
-
-        if ($errors !== null) {
-            $response['errors'] = $errors;
-        }
-
-        return response()->json($response, $status);
+        $response = ApiResponse::error($message, $errors, $status);
+        return $response->toResponse(request());
     }
 
     /**
      * Обработка исключений с логированием
      */
     protected function handleException(
-        Throwable $exception, 
+        Throwable $exception,
         string $context = 'Unknown operation',
         array $extraData = []
     ): JsonResponse {
-        Log::error($context, [
-            'error' => $exception->getMessage(),
+        $errorData = [
+            'message' => $exception->getMessage(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace' => $exception->getTraceAsString(),
-            ...$extraData
-        ]);
+            'context' => $context,
+            'extra_data' => $extraData,
+            'user_id' => request()->user()?->id,
+            'url' => request()->url(),
+            'method' => request()->method(),
+        ];
+
+        Log::error("Exception in {$context}", $errorData);
+
+        // В продакшене не показываем детали ошибки
+        $userMessage = config('app.debug') 
+            ? $exception->getMessage()
+            : 'Произошла внутренняя ошибка сервера';
 
         return $this->errorResponse(
-            message: 'An error occurred while processing your request',
+            message: $userMessage,
             status: 500
         );
     }
 
     /**
-     * Проверка авторизации пользователя
+     * Проверка аутентификации пользователя
      */
     protected function requireAuth(): void
     {
-        if (!auth()->check()) {
-            abort(401, 'Unauthorized');
+        if (!request()->user()) {
+            abort(401, 'Требуется авторизация');
         }
+    }
+
+    /**
+     * Проверка прав доступа к сниппету
+     */
+    protected function requireSnippetAccess(int $snippetId): void
+    {
+        $user = request()->user();
+        if (!$user) {
+            abort(401, 'Требуется авторизация');
+        }
+
+        // Здесь можно добавить дополнительную логику проверки прав
+        // Например, проверка владения сниппетом или публичного доступа
     }
 }

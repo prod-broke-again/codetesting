@@ -3,16 +3,17 @@
 namespace App\DataTransferObjects;
 
 use App\Enums\ProgrammingLanguage;
+use App\Enums\SnippetPrivacy;
 
 readonly class CreateSnippetDto
 {
     public function __construct(
         public string $content,
         public ProgrammingLanguage $language,
-        public string $theme,
+        public SnippetPrivacy $privacy = SnippetPrivacy::PUBLIC,
         public bool $isEncrypted = false,
-        public ?string $expiresAt = null,
-        public string $privacy = 'public'
+        public string $theme = 'vs-dark',
+        public ?string $expiresAt = null
     ) {}
 
     public static function fromArray(array $data): self
@@ -20,10 +21,10 @@ readonly class CreateSnippetDto
         return new self(
             content: $data['content'],
             language: ProgrammingLanguage::from($data['language']),
-            theme: $data['theme'],
+            privacy: isset($data['privacy']) ? SnippetPrivacy::from($data['privacy']) : SnippetPrivacy::PUBLIC,
             isEncrypted: $data['is_encrypted'] ?? false,
-            expiresAt: $data['expires_at'] ?? null,
-            privacy: $data['privacy'] ?? 'public'
+            theme: $data['theme'] ?? 'vs-dark',
+            expiresAt: $data['expires_at'] ?? null
         );
     }
 
@@ -32,10 +33,20 @@ readonly class CreateSnippetDto
         return [
             'content' => $this->content,
             'language' => $this->language->value,
-            'theme' => $this->theme,
+            'privacy' => $this->privacy->value,
             'is_encrypted' => $this->isEncrypted,
+            'theme' => $this->theme,
             'expires_at' => $this->expiresAt,
-            'privacy' => $this->privacy,
         ];
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->privacy === SnippetPrivacy::PUBLIC && !$this->isEncrypted;
+    }
+
+    public function requiresAuthentication(): bool
+    {
+        return $this->isEncrypted || $this->privacy === SnippetPrivacy::PRIVATE;
     }
 }
