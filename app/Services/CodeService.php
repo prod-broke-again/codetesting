@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\Encryptable;
 use App\Events\CodeAccessed;
+use App\Enums\SnippetPrivacy;
 use App\Models\Code;
 use App\Models\Fingerprint;
 use App\Models\User;
@@ -35,7 +36,7 @@ class CodeService implements Encryptable
             'language' => $data['language'],
             'theme' => $data['theme'] ?? 'vs-dark',
             'is_encrypted' => $data['is_encrypted'] ?? false,
-            'privacy' => $data['privacy'] ?? 'public',
+            'privacy' => $data['privacy'] ?? SnippetPrivacy::PUBLIC,
             'is_guest' => !$user,
             'edit_token' => $this->generateEditToken(),
             'user_id' => $user?->id,
@@ -117,12 +118,12 @@ class CodeService implements Encryptable
         }
 
         // Приватные сниппеты только для владельца
-        if ($code->privacy === 'private') {
+        if ($code->privacy === SnippetPrivacy::PRIVATE) {
             return $user && $code->user_id === $user->id;
         }
 
         // Непубличные сниппеты для владельца или с токеном
-        if ($code->privacy === 'unlisted') {
+        if ($code->privacy === SnippetPrivacy::UNLISTED) {
             if ($user && $code->user_id === $user->id) {
                 return true;
             }

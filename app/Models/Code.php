@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\ProgrammingLanguage;
+use App\Enums\SnippetPrivacy;
 use App\Enums\SnippetStatus;
 use App\ValueObjects\SnippetHash;
 
@@ -36,6 +37,7 @@ class Code extends Model
         'last_accessed_at' => 'datetime',
         'expires_at' => 'datetime',
         'language' => ProgrammingLanguage::class,
+        'privacy' => SnippetPrivacy::class,
     ];
 
     /**
@@ -96,7 +98,7 @@ class Code extends Model
             return SnippetStatus::EXPIRED;
         }
 
-        if ($this->privacy === 'private') {
+        if ($this->privacy === SnippetPrivacy::PRIVATE) {
             return SnippetStatus::PRIVATE;
         }
 
