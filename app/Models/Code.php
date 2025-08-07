@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\ProgrammingLanguage;
+use App\Enums\SnippetStatus;
+use App\ValueObjects\SnippetHash;
 
 class Code extends Model
 {
@@ -32,6 +35,7 @@ class Code extends Model
         'is_guest' => 'boolean',
         'last_accessed_at' => 'datetime',
         'expires_at' => 'datetime',
+        'language' => ProgrammingLanguage::class,
     ];
 
     /**
@@ -53,13 +57,9 @@ class Code extends Model
     /**
      * Генерация уникального хеша для сниппета
      */
-    public static function generateHash(): string
+    public static function generateHash(): SnippetHash
     {
-        do {
-            $hash = bin2hex(random_bytes(8)); // 16 символов
-        } while (self::where('hash', $hash)->exists());
-
-        return $hash;
+        return SnippetHash::generate();
     }
 
     /**
@@ -85,5 +85,21 @@ class Code extends Model
     {
         $this->increment('access_count');
         $this->update(['last_accessed_at' => now()]);
+    }
+
+    /**
+     * Получить статус сниппета
+     */
+    public function getStatus(): SnippetStatus
+    {
+        if ($this->isExpired()) {
+            return SnippetStatus::EXPIRED;
+        }
+
+        if ($this->privacy === 'private') {
+            return SnippetStatus::PRIVATE;
+        }
+
+        return SnippetStatus::ACTIVE;
     }
 }

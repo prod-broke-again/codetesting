@@ -8,14 +8,17 @@ use App\Http\Requests\UpdateSnippetRequest;
 use App\Http\Resources\CodeResource;
 use App\Models\Code;
 use App\Services\CodeService;
+use App\Contracts\CodeRepositoryInterface;
+use App\DataTransferObjects\CreateSnippetDto;
+use App\ValueObjects\SnippetHash;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class CodeController extends Controller
 {
     public function __construct(
-        private CodeService $codeService
+        private CodeService $codeService,
+        private CodeRepositoryInterface $codeRepository
     ) {}
 
     /**
@@ -24,30 +27,30 @@ class CodeController extends Controller
     public function store(CreateSnippetRequest $request): JsonResponse
     {
         try {
+            $dto = CreateSnippetDto::fromArray($request->validated());
             $code = $this->codeService->createSnippet(
-                $request->validated(),
+                $dto->toArray(),
                 $request->user()
             );
 
-            return response()->json([
-                'success' => true,
-                'data' => new CodeResource($code),
-                'message' => $code->is_guest 
-                    ? 'Сниппет создан! Сохраните токен для редактирования.'
-                    : 'Сниппет создан успешно!'
-            ], 201);
+            $message = $code->is_guest
+                ? 'Сниппет создан! Сохраните токен для редактирования.'
+                : 'Сниппет создан успешно!';
 
+            return $this->successResponse(
+                data: new CodeResource($code),
+                message: $message,
+                status: 201
+            );
         } catch (\Exception $e) {
-            Log::error('Ошибка создания сниппета', [
-                'error' => $e->getMessage(),
-                'user_id' => $request->user()?->id,
-                'data' => $request->except(['content'])
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка создания сниппета'
-            ], 500);
+            return $this->handleException(
+                exception: $e,
+                context: 'Ошибка создания сниппета',
+                extraData: [
+                    'user_id' => $request->user()?->id,
+                    'data' => $request->except(['content'])
+                ]
+            );
         }
     }
 
@@ -56,30 +59,38 @@ class CodeController extends Controller
      */
     public function show(string $hash): JsonResponse
     {
-        $code = $this->codeService->findByHash($hash);
+        try {
+            $snippetHash = SnippetHash::fromString($hash);
+            $code = $this->codeRepository->findByHash($snippetHash->value);
 
-        if (!$code) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Сниппет не найден'
-            ], 404);
+            if (!$code) {
+                return $this->errorResponse(
+                    message: 'Сниппет не найден',
+                    status: 404
+                );
+            }
+
+            // Проверяем доступ
+            if (!$this->codeService->canAccess($code, request()->user())) {
+                return $this->errorResponse(
+                    message: 'Сниппет недоступен или истек срок действия',
+                    status: 403
+                );
+            }
+
+            // Увеличиваем счетчик просмотров
+            $this->codeService->incrementAccessCount($code, request()->user());
+
+            return $this->successResponse(
+                data: new CodeResource($code)
+            );
+        } catch (\Exception $e) {
+            return $this->handleException(
+                exception: $e,
+                context: 'Ошибка получения сниппета',
+                extraData: ['hash' => $hash]
+            );
         }
-
-        // Проверяем доступ
-        if (!$this->codeService->canAccess($code, request()->user())) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Сниппет недоступен или истек срок действия'
-            ], 403);
-        }
-
-        // Увеличиваем счетчик просмотров
-        $this->codeService->incrementAccessCount($code);
-
-        return response()->json([
-            'success' => true,
-            'data' => new CodeResource($code)
-        ]);
     }
 
     /**
@@ -87,44 +98,42 @@ class CodeController extends Controller
      */
     public function update(UpdateSnippetRequest $request, string $hash): JsonResponse
     {
-        $code = $this->codeService->findByHash($hash);
-
-        if (!$code) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Сниппет не найден'
-            ], 404);
-        }
-
-        // Проверяем права на редактирование
-        $editToken = $request->input('edit_token');
-        if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Нет прав на редактирование сниппета'
-            ], 403);
-        }
-
         try {
+            $snippetHash = SnippetHash::fromString($hash);
+            $code = $this->codeRepository->findByHash($snippetHash->value);
+
+            if (!$code) {
+                return $this->errorResponse(
+                    message: 'Сниппет не найден',
+                    status: 404
+                );
+            }
+
+            // Проверяем права на редактирование
+            $editToken = $request->input('edit_token');
+            if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
+                return $this->errorResponse(
+                    message: 'Нет прав на редактирование сниппета',
+                    status: 403
+                );
+            }
+
             $updatedCode = $this->codeService->updateSnippet($code, $request->validated());
 
-            return response()->json([
-                'success' => true,
-                'data' => new CodeResource($updatedCode),
-                'message' => 'Сниппет обновлен успешно!'
-            ]);
+            return $this->successResponse(
+                data: new CodeResource($updatedCode),
+                message: 'Сниппет обновлен успешно!'
+            );
 
         } catch (\Exception $e) {
-            Log::error('Ошибка обновления сниппета', [
-                'error' => $e->getMessage(),
-                'hash' => $hash,
-                'user_id' => request()->user()?->id
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка обновления сниппета'
-            ], 500);
+            return $this->handleException(
+                exception: $e,
+                context: 'Ошибка обновления сниппета',
+                extraData: [
+                    'hash' => $hash,
+                    'user_id' => request()->user()?->id
+                ]
+            );
         }
     }
 
@@ -133,43 +142,41 @@ class CodeController extends Controller
      */
     public function destroy(Request $request, string $hash): JsonResponse
     {
-        $code = $this->codeService->findByHash($hash);
-
-        if (!$code) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Сниппет не найден'
-            ], 404);
-        }
-
-        // Проверяем права на удаление
-        $editToken = $request->input('edit_token');
-        if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Нет прав на удаление сниппета'
-            ], 403);
-        }
-
         try {
-            $this->codeService->deleteSnippet($code);
+            $snippetHash = SnippetHash::fromString($hash);
+            $code = $this->codeRepository->findByHash($snippetHash->value);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Сниппет удален успешно!'
-            ]);
+            if (!$code) {
+                return $this->errorResponse(
+                    message: 'Сниппет не найден',
+                    status: 404
+                );
+            }
+
+            // Проверяем права на удаление
+            $editToken = $request->input('edit_token');
+            if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
+                return $this->errorResponse(
+                    message: 'Нет прав на удаление сниппета',
+                    status: 403
+                );
+            }
+
+            $this->codeRepository->delete($code);
+
+            return $this->successResponse(
+                message: 'Сниппет удален успешно!'
+            );
 
         } catch (\Exception $e) {
-            Log::error('Ошибка удаления сниппета', [
-                'error' => $e->getMessage(),
-                'hash' => $hash,
-                'user_id' => request()->user()?->id
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка удаления сниппета'
-            ], 500);
+            return $this->handleException(
+                exception: $e,
+                context: 'Ошибка удаления сниппета',
+                extraData: [
+                    'hash' => $hash,
+                    'user_id' => request()->user()?->id
+                ]
+            );
         }
     }
 }

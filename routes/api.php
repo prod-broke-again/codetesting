@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CodeController;
+use App\Http\Controllers\Api\StatsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -21,4 +22,13 @@ Route::prefix('codes')->group(function () {
     
     // Удаление сниппета (требует токен)
     Route::delete('/{hash}', [CodeController::class, 'destroy']);
+});
+
+// API маршруты для статистики
+Route::prefix('stats')->group(function () {
+    // Общая статистика платформы
+    Route::get('/', [StatsController::class, 'index']);
+    
+    // Доступные языки программирования
+    Route::get('/languages', [StatsController::class, 'languages']);
 });

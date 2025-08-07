@@ -6,19 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
+use App\Services\UserProfileService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    protected AuthService $authService;
-
-    public function __construct(AuthService $authService)
-    {
-        $this->authService = $authService;
-    }
+    public function __construct(
+        private AuthService $authService,
+        private UserProfileService $profileService
+    ) {}
 
     /**
      * Показать единую страницу авторизации
@@ -39,20 +37,19 @@ class AuthController extends Controller
         try {
             $credentials = $request->validated();
             
-            if ($this->authService->attemptLogin($credentials)) {
-                $user = $this->authService->getCurrentUser();
-                
-                // Связываем fingerprint с пользователем
-                if ($fingerprint = $request->header('X-Fingerprint')) {
-                    $this->authService->linkFingerprintToUser($fingerprint, $user);
-                }
-                
-                return redirect()->intended('/')->with('message', 'Вы успешно вошли в систему');
+            if (!$this->authService->attemptLogin($credentials)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Неверные учетные данные.']
+                ]);
             }
             
-            throw ValidationException::withMessages([
-                'email' => ['Неверные учетные данные.']
-            ]);
+            $user = $this->authService->getCurrentUser();
+            
+            if ($fingerprint = $request->header('X-Fingerprint')) {
+                $this->profileService->linkFingerprint($user, $fingerprint);
+            }
+            
+            return redirect()->intended('/')->with('message', 'Вы успешно вошли в систему');
             
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
@@ -69,17 +66,11 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
             
-            // Проверяем, не существует ли уже пользователь с таким email
-            if ($this->authService->getCurrentUser() || \App\Models\User::where('email', $data['email'])->exists()) {
-                return back()->withErrors(['email' => 'Пользователь с таким email уже существует']);
-            }
-            
             $user = $this->authService->createUser($data);
             $this->authService->login($user);
             
-            // Связываем fingerprint с пользователем
             if ($fingerprint = $request->header('X-Fingerprint')) {
-                $this->authService->linkFingerprintToUser($fingerprint, $user);
+                $this->profileService->linkFingerprint($user, $fingerprint);
             }
             
             return redirect('/')->with('message', 'Аккаунт успешно создан');
@@ -96,9 +87,7 @@ class AuthController extends Controller
     {
         try {
             $this->authService->logout();
-            
             return redirect('/')->with('message', 'Вы успешно вышли из системы');
-            
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Ошибка выхода из системы']);
         }
@@ -109,18 +98,10 @@ class AuthController extends Controller
      */
     public function me()
     {
-        $user = $this->authService->getCurrentUser();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Пользователь не авторизован'
-            ], 401);
+        if (!auth()->check()) {
+            return $this->errorResponse('Пользователь не авторизован', 401);
         }
-        
-        return response()->json([
-            'success' => true,
-            'user' => $user
-        ]);
+
+        return $this->successResponse(auth()->user());
     }
 }

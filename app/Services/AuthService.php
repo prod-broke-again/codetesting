@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Code;
 use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Socialite\Facades\Socialite;
 
 class AuthService
 {
@@ -14,7 +16,7 @@ class AuthService
      */
     public function createOrUpdateUserFromSocialite($socialiteUser, string $provider): User
     {
-        $user = User::updateOrCreate(
+        return User::updateOrCreate(
             [
                 'email' => $socialiteUser->getEmail(),
             ],
@@ -25,8 +27,6 @@ class AuthService
                 $provider . '_id' => $socialiteUser->getId(),
             ]
         );
-
-        return $user;
     }
 
     /**
@@ -68,7 +68,7 @@ class AuthService
     /**
      * Получить текущего пользователя
      */
-    public function getCurrentUser(): ?User
+    public function getCurrentUser(): Authenticatable
     {
         return Auth::user();
     }
@@ -114,10 +114,10 @@ class AuthService
     /**
      * Получить связанные сниппеты по fingerprint
      */
-    public function getRelatedSnippetsByFingerprint(string $fingerprintHash): \Illuminate\Database\Eloquent\Collection
+    public function getRelatedSnippetsByFingerprint(string $fingerprintHash): Collection
     {
-        return \App\Models\Code::whereHas('fingerprint', function ($query) use ($fingerprintHash) {
+        return Code::whereHas('fingerprint', function ($query) use ($fingerprintHash) {
             $query->where('fingerprint_hash', $fingerprintHash);
         })->get();
     }
-} 
+}

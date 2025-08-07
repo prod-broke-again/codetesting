@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Code;
+use App\Contracts\CodeRepositoryInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class MySnippetsController extends Controller
 {
+    public function __construct(
+        private CodeRepositoryInterface $codeRepository
+    ) {}
+    
     /**
      * Показать страницу моих сниппетов
      */
@@ -19,47 +23,18 @@ class MySnippetsController extends Controller
             return redirect('/auth');
         }
 
-        $query = Code::where('user_id', $user->id)
-            ->with('user');
+        $filters = [
+            'privacy' => $request->input('privacy'),
+            'language' => $request->input('language'),
+            'search' => $request->input('search'),
+            'sort' => $request->input('sort', 'latest'),
+        ];
 
-        // Фильтрация по приватности
-        if ($request->has('privacy') && $request->privacy) {
-            $query->where('privacy', $request->privacy);
-        }
-
-        // Фильтрация по языку
-        if ($request->has('language') && $request->language) {
-            $query->where('language', $request->language);
-        }
-
-        // Поиск по содержимому
-        if ($request->has('search') && $request->search) {
-            $query->where('content', 'like', '%' . $request->search . '%');
-        }
-
-        // Сортировка
-        $sort = $request->get('sort', 'latest');
-        switch ($sort) {
-            case 'popular':
-                $query->orderBy('access_count', 'desc');
-                break;
-            case 'oldest':
-                $query->orderBy('created_at', 'asc');
-                break;
-            default:
-                $query->orderBy('created_at', 'desc');
-        }
-
-        $snippets = $query->paginate(20);
+        $snippets = $this->codeRepository->getUserSnippetsWithFilters($user, $filters);
 
         return Inertia::render('MySnippets', [
             'snippets' => $snippets,
-            'filters' => [
-                'privacy' => $request->privacy,
-                'language' => $request->language,
-                'search' => $request->search,
-                'sort' => $sort
-            ],
+            'filters' => $filters,
             'title' => 'Мои сниппеты',
             'description' => 'Управляйте своими сниппетами'
         ]);

@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,12 @@ Route::get('/auth/google', [SocialiteController::class, 'redirectToGoogle'])->na
 Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 Route::get('/auth/github', [SocialiteController::class, 'redirectToGithub'])->name('auth.github');
 Route::get('/auth/github/callback', [SocialiteController::class, 'handleGithubCallback'])->name('auth.github.callback');
+
+// Экспорт сниппетов (требует авторизации)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/export/json', [ExportController::class, 'exportJson'])->name('export.json');
+    Route::get('/export/zip', [ExportController::class, 'exportZip'])->name('export.zip');
+});
 
 // API маршруты для сниппетов
 Route::prefix('api')->group(function () {

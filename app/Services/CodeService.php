@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Models\Code;
 use App\Models\User;
+use App\Contracts\Encryptable;
 use App\Models\Fingerprint;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
+use App\Events\CodeCreated;
+use App\Events\CodeAccessed;
 use Illuminate\Support\Facades\Hash;
 
-class CodeService
+class CodeService implements Encryptable
 {
     /**
      * Создать новый сниппет
@@ -27,7 +30,7 @@ class CodeService
         
         // Шифрование контента если нужно
         if ($code->is_encrypted) {
-            $code->content = Crypt::encryptString($data['content']);
+            $code->content = $this->encrypt($data['content']);
         }
         
         // Генерация токена для гостевых сниппетов
@@ -48,6 +51,8 @@ class CodeService
         
         $code->save();
         
+        CodeCreated::dispatch($code, $user);
+
         return $code;
     }
     
@@ -63,7 +68,7 @@ class CodeService
         if (isset($data['is_encrypted'])) {
             $code->is_encrypted = $data['is_encrypted'];
             if ($code->is_encrypted) {
-                $code->content = Crypt::encryptString($data['content']);
+                $code->content = $this->encrypt($data['content']);
             }
         }
         
@@ -133,14 +138,16 @@ class CodeService
         
         return false;
     }
-    
+
     /**
      * Увеличить счетчик просмотров
      */
-    public function incrementAccessCount(Code $code): void
+    public function incrementAccessCount(Code $code, ?User $user = null): void
     {
         $code->increment('access_count');
         $code->update(['last_accessed_at' => now()]);
+
+        CodeAccessed::dispatch($code, $user, request()->ip(), request()->userAgent());
     }
     
     /**
@@ -169,6 +176,26 @@ class CodeService
         );
     }
     
+    /**
+     * Имплементация метода encrypt интерфейса Encryptable
+     */
+    public function encrypt(string $data): string
+    {
+        return Crypt::encryptString($data);
+    }
+
+    /**
+     * Имплементация метода decrypt интерфейса Encryptable
+     */
+    public function decrypt(string $encryptedData): string
+    {
+        try {
+            return Crypt::decryptString($encryptedData);
+        } catch (\Exception $e) {
+            return 'Ошибка расшифровки контента';
+        }
+    }
+
     /**
      * Генерировать уникальный хеш
      */

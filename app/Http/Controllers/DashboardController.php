@@ -2,44 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Code;
+use App\Services\UserStatsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private UserStatsService $statsService
+    ) {}
+
     /**
      * Показать дашборд пользователя
      */
     public function index(Request $request)
     {
+        $this->requireAuth();
         $user = $request->user();
-        
-        if (!$user) {
-            return redirect('/auth');
-        }
 
-        // Статистика пользователя
-        $stats = [
-            'total_snippets' => Code::where('user_id', $user->id)->count(),
-            'public_snippets' => Code::where('user_id', $user->id)->where('privacy', 'public')->count(),
-            'private_snippets' => Code::where('user_id', $user->id)->where('privacy', 'private')->count(),
-            'unlisted_snippets' => Code::where('user_id', $user->id)->where('privacy', 'unlisted')->count(),
-            'total_views' => Code::where('user_id', $user->id)->sum('access_count'),
-            'encrypted_snippets' => Code::where('user_id', $user->id)->where('is_encrypted', true)->count(),
-        ];
-
-        // Последние сниппеты
-        $recentSnippets = Code::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Популярные сниппеты
-        $popularSnippets = Code::where('user_id', $user->id)
-            ->orderBy('access_count', 'desc')
-            ->limit(5)
-            ->get();
+        $stats = $this->statsService->getUserStats($user);
+        $recentSnippets = $this->statsService->getRecentSnippets($user);
+        $popularSnippets = $this->statsService->getPopularSnippets($user);
 
         return Inertia::render('Dashboard', [
             'stats' => $stats,
