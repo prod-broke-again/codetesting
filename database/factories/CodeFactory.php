@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -29,7 +30,7 @@ class CodeFactory extends Factory
             'privacy' => fake()->randomElement(['public', 'private']),
             'is_guest' => false,
             'edit_token' => fake()->sha256(),
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => User::factory(),
             'access_count' => fake()->numberBetween(0, 100),
             'last_accessed_at' => fake()->dateTimeThisMonth(),
         ];

@@ -2,6 +2,10 @@
 
 namespace App\Enums;
 
+use App\Services\Encryption\AesEncryptionStrategy;
+use App\Services\Encryption\LaravelEncryptionStrategy;
+use InvalidArgumentException;
+
 enum EncryptionType: string
 {
     case LARAVEL = 'laravel';
@@ -20,9 +24,9 @@ enum EncryptionType: string
     public function getStrategyClass(): string
     {
         return match($this) {
-            self::LARAVEL => \App\Services\Encryption\LaravelEncryptionStrategy::class,
-            self::AES => \App\Services\Encryption\AesEncryptionStrategy::class,
-            self::NONE => throw new \InvalidArgumentException('No encryption strategy for NONE type'),
+            self::LARAVEL => LaravelEncryptionStrategy::class,
+            self::AES => AesEncryptionStrategy::class,
+            self::NONE => throw new InvalidArgumentException('No encryption strategy for NONE type'),
         };
     }
 }
