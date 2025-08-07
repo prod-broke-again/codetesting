@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SnippetExportService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,7 +29,7 @@ class ExportController extends Controller
                 data: $data,
                 message: 'Данные успешно экспортированы'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Export JSON failed',
@@ -60,7 +61,7 @@ class ExportController extends Controller
             }, basename($zipFilePath), [
                 'Content-Type' => 'application/zip',
             ])->deleteFileAfterSend(true);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Export ZIP failed',

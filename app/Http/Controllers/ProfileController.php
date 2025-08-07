@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\DeleteAccountRequest;
 use App\Services\UserProfileService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ProfileController extends Controller
@@ -31,7 +33,7 @@ class ProfileController extends Controller
                 'title' => 'Профиль',
                 'description' => 'Управление профилем'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Profile page load failed',
@@ -52,9 +54,9 @@ class ProfileController extends Controller
             $this->profileService->updateProfile($user, $request->validated());
             
             return back()->with('message', 'Профиль успешно обновлен');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Profile update failed',
@@ -75,9 +77,9 @@ class ProfileController extends Controller
             $this->profileService->deleteAccount($user, $request->validated()['password']);
             
             return redirect('/')->with('message', 'Аккаунт успешно удален');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Account deletion failed',
