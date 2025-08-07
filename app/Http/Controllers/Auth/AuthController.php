@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
 use App\Services\UserProfileService;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
@@ -53,7 +54,7 @@ class AuthController extends Controller
             
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->withErrors(['email' => 'Ошибка входа в систему']);
         }
     }
@@ -75,7 +76,7 @@ class AuthController extends Controller
             
             return redirect('/')->with('message', 'Аккаунт успешно создан');
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->withErrors(['email' => 'Ошибка создания аккаунта']);
         }
     }
@@ -88,7 +89,7 @@ class AuthController extends Controller
         try {
             $this->authService->logout();
             return redirect('/')->with('message', 'Вы успешно вышли из системы');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->withErrors(['error' => 'Ошибка выхода из системы']);
         }
     }
@@ -98,10 +99,24 @@ class AuthController extends Controller
      */
     public function me()
     {
-        if (!auth()->check()) {
-            return $this->errorResponse('Пользователь не авторизован', 401);
+        try {
+            $user = $this->authService->getCurrentUser();
+            
+            if (!$user) {
+                return response()->json(['authenticated' => false]);
+            }
+            
+            return response()->json([
+                'authenticated' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'created_at' => $user->created_at
+                ]
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['authenticated' => false]);
         }
-
-        return $this->successResponse(auth()->user());
     }
 }

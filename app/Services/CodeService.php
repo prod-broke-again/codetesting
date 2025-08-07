@@ -2,119 +2,131 @@
 
 namespace App\Services;
 
-use App\Models\Code;
-use App\Models\User;
 use App\Contracts\Encryptable;
-use App\Models\Fingerprint;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Crypt;
-use App\Events\CodeCreated;
 use App\Events\CodeAccessed;
+use App\Models\Code;
+use App\Models\Fingerprint;
+use App\Models\User;
+use App\Repositories\CodeRepository;
+use App\ValueObjects\SnippetHash;
+use Exception;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class CodeService implements Encryptable
 {
+    public function __construct(
+        private CodeRepository $codeRepository
+    ) {}
+
     /**
      * Создать новый сниппет
      */
     public function createSnippet(array $data, ?User $user = null): Code
     {
-        $code = new Code();
-        $code->hash = $this->generateHash();
-        $code->content = $data['content'];
-        $code->language = $data['language'];
-        $code->theme = $data['theme'];
-        $code->is_encrypted = $data['is_encrypted'] ?? false;
-        $code->is_guest = $user === null;
-        $code->user_id = $user?->id;
+        // Генерируем уникальный хеш
+        $hash = $this->generateHash();
         
-        // Шифрование контента если нужно
-        if ($code->is_encrypted) {
-            $code->content = $this->encrypt($data['content']);
+        // Подготавливаем данные
+        $snippetData = [
+            'hash' => $hash,
+            'content' => $data['content'],
+            'language' => $data['language'],
+            'theme' => $data['theme'] ?? 'vs-dark',
+            'is_encrypted' => $data['is_encrypted'] ?? false,
+            'privacy' => $data['privacy'] ?? 'public',
+            'is_guest' => !$user,
+            'edit_token' => $this->generateEditToken(),
+            'user_id' => $user?->id,
+            'expires_at' => isset($data['expires_at']) ? $data['expires_at'] : null,
+        ];
+
+        // Шифруем контент если нужно
+        if ($snippetData['is_encrypted']) {
+            $snippetData['content'] = $this->encrypt($snippetData['content']);
         }
-        
-        // Генерация токена для гостевых сниппетов
-        if ($code->is_guest) {
-            $code->edit_token = $this->generateEditToken();
+
+        // Создаем сниппет
+        $code = $this->codeRepository->create($snippetData);
+
+        // Связываем с fingerprint если есть
+        if ($fingerprint = $this->getOrCreateFingerprint()) {
+            $code->update(['fingerprint_id' => $fingerprint->id]);
         }
-        
-        // Установка времени истечения
-        if (isset($data['expires_at']) && $data['expires_at']) {
-            $code->expires_at = $data['expires_at'];
-        }
-        
-        // Связывание с fingerprint
-        $fingerprint = $this->getOrCreateFingerprint();
-        if ($fingerprint) {
-            $code->fingerprint_id = $fingerprint->id;
-        }
-        
-        $code->save();
-        
-        CodeCreated::dispatch($code, $user);
 
         return $code;
     }
-    
+
     /**
      * Обновить сниппет
      */
     public function updateSnippet(Code $code, array $data): Code
     {
-        $code->content = $data['content'];
-        $code->language = $data['language'];
-        $code->theme = $data['theme'];
-        
-        if (isset($data['is_encrypted'])) {
-            $code->is_encrypted = $data['is_encrypted'];
-            if ($code->is_encrypted) {
-                $code->content = $this->encrypt($data['content']);
-            }
+        $updateData = [];
+
+        if (isset($data['content'])) {
+            $updateData['content'] = $code->is_encrypted 
+                ? $this->encrypt($data['content']) 
+                : $data['content'];
         }
-        
+
+        if (isset($data['language'])) {
+            $updateData['language'] = $data['language'];
+        }
+
+        if (isset($data['theme'])) {
+            $updateData['theme'] = $data['theme'];
+        }
+
+        if (isset($data['privacy'])) {
+            $updateData['privacy'] = $data['privacy'];
+        }
+
         if (isset($data['expires_at'])) {
-            $code->expires_at = $data['expires_at'];
+            $updateData['expires_at'] = $data['expires_at'];
         }
-        
-        $code->save();
-        
-        return $code;
+
+        return $this->codeRepository->update($code->id, $updateData);
     }
-    
+
     /**
      * Удалить сниппет
      */
     public function deleteSnippet(Code $code): bool
     {
-        return $code->delete();
+        return $this->codeRepository->delete($code->id);
     }
-    
+
     /**
      * Найти сниппет по хешу
      */
     public function findByHash(string $hash): ?Code
     {
-        return Code::where('hash', $hash)->first();
+        return $this->codeRepository->findByHash($hash);
     }
-    
+
     /**
      * Проверить доступ к сниппету
      */
     public function canAccess(Code $code, ?User $user = null, ?string $editToken = null): bool
     {
-        // Проверка истечения срока
+        // Проверяем истечение срока
         if ($code->isExpired()) {
             return false;
         }
-        
-        // Владелец всегда имеет доступ
-        if ($user && $code->user_id === $user->id) {
-            return true;
+
+        // Приватные сниппеты только для владельца
+        if ($code->privacy === 'private') {
+            return $user && $code->user_id === $user->id;
         }
-        
-        // Проверка токена для гостевых сниппетов
-        if ($code->is_guest && $editToken && $code->edit_token === $editToken) {
-            return true;
+
+        // Непубличные сниппеты для владельца или с токеном
+        if ($code->privacy === 'unlisted') {
+            if ($user && $code->user_id === $user->id) {
+                return true;
+            }
+            return $editToken && $code->edit_token === $editToken;
         }
         
         // Публичный доступ для просмотра
@@ -137,6 +149,14 @@ class CodeService implements Encryptable
         }
         
         return false;
+    }
+
+    /**
+     * Проверить права на удаление
+     */
+    public function canDelete(Code $code, ?User $user = null, ?string $editToken = null): bool
+    {
+        return $this->canEdit($code, $user, $editToken);
     }
 
     /**
@@ -191,7 +211,7 @@ class CodeService implements Encryptable
     {
         try {
             return Crypt::decryptString($encryptedData);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 'Ошибка расшифровки контента';
         }
     }

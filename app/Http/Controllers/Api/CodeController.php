@@ -11,6 +11,7 @@ use App\Services\CodeService;
 use App\Contracts\CodeRepositoryInterface;
 use App\DataTransferObjects\CreateSnippetDto;
 use App\ValueObjects\SnippetHash;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -42,7 +43,7 @@ class CodeController extends Controller
                 message: $message,
                 status: 201
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Ошибка создания сниппета',
@@ -84,7 +85,7 @@ class CodeController extends Controller
             return $this->successResponse(
                 data: new CodeResource($code)
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Ошибка получения сниппета',
@@ -110,28 +111,29 @@ class CodeController extends Controller
             }
 
             // Проверяем права на редактирование
-            $editToken = $request->input('edit_token');
-            if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
+            if (!$this->codeService->canEdit($code, $request->user(), $request->input('edit_token'))) {
                 return $this->errorResponse(
                     message: 'Нет прав на редактирование сниппета',
                     status: 403
                 );
             }
 
-            $updatedCode = $this->codeService->updateSnippet($code, $request->validated());
+            $updatedCode = $this->codeService->updateSnippet(
+                $code,
+                $request->validated()
+            );
 
             return $this->successResponse(
                 data: new CodeResource($updatedCode),
-                message: 'Сниппет обновлен успешно!'
+                message: 'Сниппет обновлен успешно'
             );
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Ошибка обновления сниппета',
                 extraData: [
                     'hash' => $hash,
-                    'user_id' => request()->user()?->id
+                    'user_id' => $request->user()?->id
                 ]
             );
         }
@@ -154,27 +156,25 @@ class CodeController extends Controller
             }
 
             // Проверяем права на удаление
-            $editToken = $request->input('edit_token');
-            if (!$this->codeService->canEdit($code, request()->user(), $editToken)) {
+            if (!$this->codeService->canDelete($code, $request->user(), $request->input('edit_token'))) {
                 return $this->errorResponse(
                     message: 'Нет прав на удаление сниппета',
                     status: 403
                 );
             }
 
-            $this->codeRepository->delete($code);
+            $this->codeService->deleteSnippet($code);
 
             return $this->successResponse(
-                message: 'Сниппет удален успешно!'
+                message: 'Сниппет удален успешно'
             );
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleException(
                 exception: $e,
                 context: 'Ошибка удаления сниппета',
                 extraData: [
                     'hash' => $hash,
-                    'user_id' => request()->user()?->id
+                    'user_id' => $request->user()?->id
                 ]
             );
         }

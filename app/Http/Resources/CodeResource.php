@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Crypt;
@@ -33,7 +34,7 @@ class CodeResource extends JsonResource
         if ($this->is_encrypted) {
             try {
                 $data['content'] = Crypt::decryptString($this->content);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $data['content'] = 'Ошибка расшифровки контента';
             }
         } else {

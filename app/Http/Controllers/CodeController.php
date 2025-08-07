@@ -6,6 +6,7 @@ use App\Models\Code;
 use App\Services\CodeService;
 use App\Contracts\CodeRepositoryInterface;
 use App\ValueObjects\SnippetHash;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -56,7 +57,7 @@ class CodeController extends Controller
                     'is_guest' => $code->is_guest
                 ]
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             abort(500, 'Ошибка при обработке сниппета');
         }
     }

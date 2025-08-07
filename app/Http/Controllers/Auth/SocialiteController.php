@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -44,7 +45,7 @@ class SocialiteController extends Controller
 
             return redirect()->intended('/dashboard')->with('message', 'Вход через Google выполнен успешно!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Ошибка входа через Google', [
                 'error' => $e->getMessage()
             ]);
@@ -83,7 +84,7 @@ class SocialiteController extends Controller
 
             return redirect()->intended('/dashboard')->with('message', 'Вход через GitHub выполнен успешно!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Ошибка входа через GitHub', [
                 'error' => $e->getMessage()
             ]);
@@ -101,29 +102,20 @@ class SocialiteController extends Controller
             $fingerprintHash = $request->header('X-Fingerprint');
             
             if (!$fingerprintHash) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Fingerprint не найден'
-                ], 400);
+                return response()->json(['snippets' => []]);
             }
-
-            $snippets = $this->authService->getRelatedSnippetsByFingerprint($fingerprintHash);
-
-            return response()->json([
-                'success' => true,
-                'data' => $snippets,
-                'count' => $snippets->count()
-            ]);
-
-        } catch (\Exception $e) {
+            
+            $snippets = $this->authService->getSnippetsByFingerprint($fingerprintHash);
+            
+            return response()->json(['snippets' => $snippets]);
+            
+        } catch (Exception $e) {
             Log::error('Ошибка получения связанных сниппетов', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'fingerprint' => $request->header('X-Fingerprint')
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка получения связанных сниппетов'
-            ], 500);
+            
+            return response()->json(['snippets' => []]);
         }
     }
 }
