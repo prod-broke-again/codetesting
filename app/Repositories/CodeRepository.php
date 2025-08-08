@@ -138,12 +138,29 @@ class CodeRepository implements CodeRepositoryInterface
     }
 
     /**
+     * Количество сниппетов пользователя
+     */
+    public function countByUser(int $userId): int
+    {
+        return Code::where('user_id', $userId)->count();
+    }
+
+    /**
+     * Количество сниппетов пользователя по приватности
+     */
+    public function countByUserAndPrivacy(int $userId, string $privacy): int
+    {
+        return Code::where('user_id', $userId)
+            ->where('privacy', $privacy)
+            ->count();
+    }
+
+    /**
      * Получить общее количество просмотров сниппетов пользователя
      */
     public function getTotalViewsByUser(int $userId): int
     {
-        return $this->model
-            ->where('user_id', $userId)
+        return Code::where('user_id', $userId)
             ->sum('access_count');
     }
 
@@ -152,8 +169,7 @@ class CodeRepository implements CodeRepositoryInterface
      */
     public function countEncryptedByUser(int $userId): int
     {
-        return $this->model
-            ->where('user_id', $userId)
+        return Code::where('user_id', $userId)
             ->where('is_encrypted', true)
             ->count();
     }
@@ -161,10 +177,9 @@ class CodeRepository implements CodeRepositoryInterface
     /**
      * Получить последние сниппеты пользователя
      */
-    public function getRecentByUser(int $userId, int $limit = 5): \Illuminate\Database\Eloquent\Collection
+    public function getRecentByUser(int $userId, int $limit = 5): Collection
     {
-        return $this->model
-            ->where('user_id', $userId)
+        return Code::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
@@ -175,8 +190,6 @@ class CodeRepository implements CodeRepositoryInterface
      */
     public function deleteAllByUser(int $userId): bool
     {
-        return $this->model
-            ->where('user_id', $userId)
-            ->delete();
+        return (bool) Code::where('user_id', $userId)->delete();
     }
 }

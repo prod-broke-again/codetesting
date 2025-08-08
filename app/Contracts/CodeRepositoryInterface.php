@@ -19,4 +19,12 @@ interface CodeRepositoryInterface
     public function getPublicSnippets(int $limit = 10): Collection;
     public function findByLanguage(string $language, int $limit = 10): Collection;
     public function findPopular(int $limit = 10): Collection;
+
+    // Добавлено для статистики профиля
+    public function countByUser(int $userId): int;
+    public function countByUserAndPrivacy(int $userId, string $privacy): int;
+    public function getTotalViewsByUser(int $userId): int;
+    public function countEncryptedByUser(int $userId): int;
+    public function getRecentByUser(int $userId, int $limit = 5): Collection;
+    public function deleteAllByUser(int $userId): bool;
 }

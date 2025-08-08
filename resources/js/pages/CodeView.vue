@@ -154,15 +154,12 @@
                         <span>Поделиться</span>
                     </button>
                     
-                    <router-link
-                        to="/"
-                        class="btn-secondary flex items-center space-x-2"
-                    >
+                    <Link href="/" class="btn-secondary flex items-center space-x-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
                         <span>Создать новый</span>
-                    </router-link>
+                    </Link>
                 </div>
 
                 <!-- Информация о времени жизни -->
@@ -185,6 +182,7 @@
 import type { CodeSnippet } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
+import { Link } from '@inertiajs/vue3';
 
 // Props от Inertia.js
 interface Props {

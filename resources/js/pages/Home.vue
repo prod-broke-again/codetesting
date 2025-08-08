@@ -250,8 +250,8 @@ const form = reactive<CreateSnippetForm>({
     language: 'php' as ProgrammingLanguage,
     theme: 'vs-dark' as CodeTheme,
     is_encrypted: false,
-    expires_at: '1',
-    privacy: 'private',
+    expires_at: '',
+    privacy: 'public',
     password: ''
 });
 
@@ -290,22 +290,60 @@ const createSnippet = async (): Promise<void> => {
     isLoading.value = true;
     
     try {
-        const response = await fetch('/api/codes', {
+        // Преобразуем expires_at в ISO-дату, если выбрано относительное значение
+        let expiresAt: string | undefined = undefined;
+        switch (form.expires_at) {
+            case '1h':
+                expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString();
+                break;
+            case '24h':
+                expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+                break;
+            case '7d':
+                expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+                break;
+            case '30d':
+                expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+                break;
+            default:
+                expiresAt = undefined;
+        }
+
+        const payload = {
+            content: form.content,
+            language: form.language,
+            theme: form.theme,
+            is_encrypted: form.is_encrypted,
+            privacy: form.privacy,
+            password: form.password || undefined,
+            expires_at: expiresAt
+        };
+
+        const response = await fetch('/api/snippets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 'X-Fingerprint': localStorage.getItem('fingerprint') || ''
             },
-            body: JSON.stringify(form)
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
         });
 
         if (response.ok) {
             const data = await response.json();
             window.location.href = `/code/${data.data.hash}`;
         } else {
-            const errorData = await response.json();
-            alert(errorData.message || 'Ошибка создания сниппета');
+            // Пытаемся прочитать JSON, иначе показываем текст
+            const text = await response.text();
+            try {
+                const err = JSON.parse(text);
+                alert(err.message || 'Ошибка создания сниппета');
+            } catch (e) {
+                console.error('Ответ не JSON:', text);
+                alert('Ошибка создания сниппета');
+            }
         }
     } catch (error) {
         console.error('Ошибка:', error);
@@ -456,6 +494,7 @@ const createSnippet = async (): Promise<void> => {
 .form-container {
     max-width: 64rem;
     margin: 0 auto;
+    margin-bottom: 4rem; /* добавлен отступ от футера */
 }
 
 .form-card {

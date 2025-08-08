@@ -61,9 +61,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/export/json', [ExportController::class, 'exportJson'])->name('export.json');
     Route::get('/export/zip', [ExportController::class, 'exportZip'])->name('export.zip');
 });
-
-// API маршруты для сниппетов
-Route::prefix('api')->group(function () {
-    Route::post('/codes', [CodeController::class, 'store'])->name('api.codes.store');
-    Route::get('/codes/{hash}', [CodeController::class, 'show'])->name('api.codes.show');
-});
