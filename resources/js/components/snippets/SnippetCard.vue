@@ -14,7 +14,9 @@
       </div>
       <div class="snippet-actions">
         <slot name="actions">
-          <Link :href="`/code/${snippet.hash}`" class="btn-secondary">Просмотреть</Link>
+          <Link :href="`/code/${snippet.hash}`">
+            <ButtonSecondary>Просмотреть</ButtonSecondary>
+          </Link>
         </slot>
       </div>
     </div>
@@ -30,6 +32,7 @@ import { Link } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import { hljsLanguageClass as hljsClass } from '@/composables/useHighlight';
 import hljs from 'highlight.js';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
 
 interface Props { snippet: { hash: string; content: string; language: string; created_at?: string; access_count?: number; privacy?: string } }
 const props = defineProps<Props>();
@@ -39,7 +42,6 @@ const languageLabel = computed(() => (LANGUAGE_OPTIONS as any)[props.snippet.lan
 const codeEl = ref<HTMLElement | null>(null);
 
 onMounted(() => {
-  // Ленивая подсветка
   const el = codeEl.value;
   if (!el || !('IntersectionObserver' in window)) return hljs.highlightElement(el as HTMLElement);
   const io = new IntersectionObserver((entries) => {

@@ -9,35 +9,33 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Язык</label>
-            <select v-model="localLanguage" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-              <option v-for="(label, value) in languageOptions" :key="value" :value="value">{{ label }}</option>
-            </select>
+            <SelectInput :model-value="localLanguage" @update:modelValue="(v:string)=> localLanguage=v" :options="languageOptionsArray" />
           </div>
           <div>
             <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Тема</label>
-            <select v-model="localTheme" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-              <option value="vs-dark">VS Code Dark</option>
-              <option value="vs-light">VS Code Light</option>
-            </select>
+            <SelectInput :model-value="localTheme" @update:modelValue="(v:string)=> localTheme=v" :options="themeOptions" />
           </div>
           <div v-if="showToken">
-            <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Токен</label>
-            <input v-model="localToken" type="text" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm" placeholder="tk_..." />
+            <TextInput v-model="localToken" label="Токен" placeholder="tk_..." />
           </div>
         </div>
         <div ref="editorEl" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" @click="$emit('close')">Отмена</button>
-        <button class="btn-primary" :disabled="saving" @click="onSave">Сохранить</button>
+        <ButtonSecondary @click="$emit('close')">Отмена</ButtonSecondary>
+        <ButtonPrimary :disabled="saving" @click="onSave">Сохранить</ButtonPrimary>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
+import { ref, watch, nextTick, onBeforeUnmount, computed } from 'vue';
 import * as monaco from 'monaco-editor';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
 
 interface Props {
   open: boolean;
@@ -60,26 +58,16 @@ const localLanguage = ref(props.language);
 const localTheme = ref(props.theme === 'vs-light' ? 'vs-light' : 'vs-dark');
 const localToken = ref(props.token || '');
 
-const toMonacoLanguage = (lang: string) => {
-  const map: Record<string, string> = { php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'html', css: 'css', sql: 'sql', bash: 'shell', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'html', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'html', 'html-js': 'html' };
-  const key = (lang || '').toString().toLowerCase();
-  return map[key] || 'plaintext';
-};
+const languageOptionsArray = computed(() => Object.entries(props.languageOptions).map(([value, label]) => ({ value, label })));
+const themeOptions = [ { value: 'vs-dark', label: 'VS Code Dark' }, { value: 'vs-light', label: 'VS Code Light' } ];
+
+const toMonacoLanguage = (lang: string) => { const map: Record<string, string> = { php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'html', css: 'css', sql: 'sql', bash: 'shell', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'html', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'html', 'html-js': 'html' }; const key = (lang || '').toString().toLowerCase(); return map[key] || 'plaintext'; };
 const toMonacoTheme = (theme: string) => (theme === 'vs-light' ? 'vs' : 'vs-dark');
 
 const mountEditor = async () => {
   await nextTick();
   if (!editorEl.value) return;
-  editor = monaco.editor.create(editorEl.value, {
-    value: localValue.value,
-    language: toMonacoLanguage(localLanguage.value),
-    theme: toMonacoTheme(localTheme.value),
-    automaticLayout: true,
-    minimap: { enabled: false },
-    fontSize: 14,
-    lineNumbers: 'on',
-    scrollBeyondLastLine: false,
-  });
+  editor = monaco.editor.create(editorEl.value, { value: localValue.value, language: toMonacoLanguage(localLanguage.value), theme: toMonacoTheme(localTheme.value), automaticLayout: true, minimap: { enabled: false }, fontSize: 14, lineNumbers: 'on', scrollBeyondLastLine: false });
 };
 const disposeEditor = () => { if (editor) { editor.dispose(); editor = null; } };
 
@@ -87,12 +75,7 @@ watch(() => props.open, (val) => { if (val) mountEditor(); else disposeEditor();
 watch(localLanguage, (val) => { const m = editor?.getModel(); if (m) monaco.editor.setModelLanguage(m, toMonacoLanguage(val)); emit('update:language', val); });
 watch(localTheme, (val) => { monaco.editor.setTheme(toMonacoTheme(val)); emit('update:theme', val); });
 
-const onSave = () => {
-  if (!editor) return;
-  emit('update:value', editor.getValue());
-  emit('update:token', localToken.value);
-  emit('save');
-};
+const onSave = () => { if (!editor) return; emit('update:value', editor.getValue()); emit('update:token', localToken.value); emit('save'); };
 
 onBeforeUnmount(disposeEditor);
 </script>
