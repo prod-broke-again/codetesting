@@ -20,32 +20,30 @@
                 <div class="filters-grid">
                     <!-- Поиск -->
                     <div class="filter-item">
-                        <input
-                            v-model="searchQuery"
-                            @input="onSearchInput"
-                            type="text"
-                            placeholder="Поиск сниппетов..."
-                            class="filter-input"
+                        <TextInput
+                          :model-value="searchQuery"
+                          @update:modelValue="(v:string)=>{ searchQuery=v; onSearchInput(); }"
+                          placeholder="Поиск сниппетов..."
                         />
                     </div>
 
                     <!-- Язык -->
                     <div class="filter-item">
-                        <select v-model="selectedLanguage" @change="applyFilters" class="filter-select">
-                            <option value="">Все языки</option>
-                            <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">
-                                {{ label }}
-                            </option>
-                        </select>
+                        <SelectInput
+                          :model-value="selectedLanguage"
+                          @update:modelValue="(v:string)=>{ selectedLanguage=v; applyFilters(); }"
+                          :options="languageOptions"
+                          placeholder="Все языки"
+                        />
                     </div>
 
                     <!-- Сортировка -->
                     <div class="filter-item">
-                        <select v-model="selectedSort" @change="applyFilters" class="filter-select">
-                            <option value="latest">Сначала новые</option>
-                            <option value="popular">По популярности</option>
-                            <option value="oldest">Сначала старые</option>
-                        </select>
+                        <SelectInput
+                          :model-value="selectedSort"
+                          @update:modelValue="(v:string)=>{ selectedSort=v; applyFilters(); }"
+                          :options="sortOptions"
+                        />
                     </div>
                 </div>
             </div>
@@ -88,16 +86,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUpdated } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref, onMounted, onUpdated, computed } from 'vue';
+import { router, Link } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
-import { Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 import SnippetCard from '@/components/snippets/SnippetCard.vue';
-import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -112,6 +110,13 @@ const props = defineProps<Props>();
 const searchQuery = ref(props.filters?.search || '');
 const selectedLanguage = ref(props.filters?.language || '');
 const selectedSort = ref(props.filters?.sort || 'latest');
+
+const languageOptions = computed(() => Object.entries(LANGUAGE_OPTIONS).map(([value, label]) => ({ value, label })));
+const sortOptions = [
+  { value: 'latest', label: 'Сначала новые' },
+  { value: 'popular', label: 'По популярности' },
+  { value: 'oldest', label: 'Сначала старые' },
+];
 
 let searchTimeout: number | null = null;
 

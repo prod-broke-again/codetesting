@@ -20,42 +20,22 @@
                 <div class="filters-grid">
                     <!-- Поиск -->
                     <div class="filter-item">
-                        <input
-                            v-model="searchQuery"
-                            @input="onSearchInput"
-                            type="text"
-                            placeholder="Поиск сниппетов..."
-                            class="filter-input"
-                        />
+                        <TextInput :model-value="searchQuery" @update:modelValue="(v:string)=>{searchQuery=v; onSearchInput();}" placeholder="Поиск сниппетов..." />
                     </div>
 
                     <!-- Приватность -->
                     <div class="filter-item">
-                        <select v-model="selectedPrivacy" @change="applyFilters" class="filter-select">
-                            <option value="">Все типы</option>
-                            <option value="private">🔒 Приватные</option>
-                            <option value="unlisted">🔗 По ссылке</option>
-                            <option value="public">🌐 Публичные</option>
-                        </select>
+                        <SelectInput :model-value="selectedPrivacy" @update:modelValue="(v:string)=>{selectedPrivacy=v; applyFilters();}" :options="privacyOptions" placeholder="Все типы" />
                     </div>
 
                     <!-- Язык -->
                     <div class="filter-item">
-                        <select v-model="selectedLanguage" @change="applyFilters" class="filter-select">
-                            <option value="">Все языки</option>
-                            <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">
-                                {{ label }}
-                            </option>
-                        </select>
+                        <SelectInput :model-value="selectedLanguage" @update:modelValue="(v:string)=>{selectedLanguage=v; applyFilters();}" :options="languageOptions" placeholder="Все языки" />
                     </div>
 
                     <!-- Сортировка -->
                     <div class="filter-item">
-                        <select v-model="selectedSort" @change="applyFilters" class="filter-select">
-                            <option value="latest">Сначала новые</option>
-                            <option value="popular">По популярности</option>
-                            <option value="oldest">Сначала старые</option>
-                        </select>
+                        <SelectInput :model-value="selectedSort" @update:modelValue="(v:string)=>{selectedSort=v; applyFilters();}" :options="sortOptions" />
                     </div>
                 </div>
             </div>
@@ -71,8 +51,10 @@
                             <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
                         </template>
                         <template #actions>
-                            <Link :href="`/code/${snippet.hash}`" class="btn-secondary">Просмотреть</Link>
-                            <button @click="openEditor(snippet)" class="btn-primary">Редактировать</button>
+                            <Link :href="`/code/${snippet.hash}`">
+                                <ButtonSecondary>Просмотреть</ButtonSecondary>
+                            </Link>
+                            <ButtonPrimary @click="openEditor(snippet)">Редактировать</ButtonPrimary>
                         </template>
                     </SnippetCard>
                 </div>
@@ -88,7 +70,7 @@
                     <p class="empty-description">
                         Создайте свой первый сниппет и поделитесь кодом с миром
                     </p>
-                    <Link href="/" class="btn-primary">Создать сниппет</Link>
+                    <Link href="/"><ButtonPrimary>Создать сниппет</ButtonPrimary></Link>
                 </div>
             </div>
 
@@ -118,18 +100,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUpdated } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref, onMounted, onUpdated, computed } from 'vue';
+import { router, Link } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
-import { Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 import CodeEditorModal from '@/components/modals/CodeEditorModal.vue';
 import SnippetCard from '@/components/snippets/SnippetCard.vue';
 import { updateSnippet as updateSnippetApi, type UpdateSnippetPayload } from '@/services/snippetService';
 import { useToast } from '@/composables/useToast';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -145,6 +130,19 @@ const searchQuery = ref(props.filters?.search || '');
 const selectedPrivacy = ref(props.filters?.privacy || '');
 const selectedLanguage = ref(props.filters?.language || '');
 const selectedSort = ref(props.filters?.sort || 'latest');
+
+const privacyOptions = [
+  { value: '', label: 'Все типы' },
+  { value: 'private', label: '🔒 Приватные' },
+  { value: 'unlisted', label: '🔗 По ссылке' },
+  { value: 'public', label: '🌐 Публичные' },
+];
+const languageOptions = computed(() => Object.entries(LANGUAGE_OPTIONS).map(([value, label]) => ({ value, label })));
+const sortOptions = [
+  { value: 'latest', label: 'Сначала новые' },
+  { value: 'popular', label: 'По популярности' },
+  { value: 'oldest', label: 'Сначала старые' },
+];
 
 let searchTimeout: number | null = null;
 

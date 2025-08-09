@@ -49,23 +49,7 @@
                 <form @submit.prevent="handleSubmit" class="space-y-6">
                     <!-- Имя (только для регистрации) -->
                     <div v-if="!isLoginMode">
-                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Имя
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <UserIcon class="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                id="name"
-                                v-model="form.name"
-                                type="text"
-                                required
-                                class="input-field pl-10"
-                                placeholder="Ваше имя"
-                                :class="{ 'border-red-500': errors.name }"
-                            />
-                        </div>
+                        <TextInput id="name" v-model="form.name" label="Имя" placeholder="Ваше имя" />
                         <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ errors.name }}
                         </p>
@@ -73,23 +57,7 @@
 
                     <!-- Email -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Email
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <EnvelopeIcon class="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                id="email"
-                                v-model="form.email"
-                                type="email"
-                                required
-                                class="input-field pl-10"
-                                placeholder="your@email.com"
-                                :class="{ 'border-red-500': errors.email }"
-                            />
-                        </div>
+                        <TextInput id="email" v-model="form.email" type="email" label="Email" placeholder="your@email.com" />
                         <p v-if="errors.email" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ errors.email }}
                         </p>
@@ -97,31 +65,7 @@
 
                     <!-- Пароль -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Пароль
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <LockClosedIcon class="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                id="password"
-                                v-model="form.password"
-                                :type="showPassword ? 'text' : 'password'"
-                                required
-                                class="input-field pl-10 pr-10"
-                                placeholder="Ваш пароль"
-                                :class="{ 'border-red-500': errors.password }"
-                            />
-                            <button
-                                type="button"
-                                @click="showPassword = !showPassword"
-                                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                                <EyeIcon v-if="showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                <EyeSlashIcon v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                            </button>
-                        </div>
+                        <TextInput id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'" label="Пароль" placeholder="Ваш пароль" />
                         <p v-if="errors.password" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ errors.password }}
                         </p>
@@ -129,31 +73,7 @@
 
                     <!-- Подтверждение пароля (только для регистрации) -->
                     <div v-if="!isLoginMode">
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Подтвердите пароль
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <LockClosedIcon class="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                id="password_confirmation"
-                                v-model="form.password_confirmation"
-                                :type="showConfirmPassword ? 'text' : 'password'"
-                                required
-                                class="input-field pl-10 pr-10"
-                                placeholder="Повторите пароль"
-                                :class="{ 'border-red-500': errors.password_confirmation }"
-                            />
-                            <button
-                                type="button"
-                                @click="showConfirmPassword = !showConfirmPassword"
-                                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                                <EyeIcon v-if="showConfirmPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                <EyeSlashIcon v-else class="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                            </button>
-                        </div>
+                        <TextInput id="password_confirmation" v-model="form.password_confirmation" :type="showConfirmPassword ? 'text' : 'password'" label="Подтвердите пароль" placeholder="Повторите пароль" />
                         <p v-if="errors.password_confirmation" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ errors.password_confirmation }}
                         </p>
@@ -161,18 +81,7 @@
 
                     <!-- Запомнить меня (только для входа) -->
                     <div v-if="isLoginMode" class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input
-                                id="remember"
-                                v-model="form.remember"
-                                type="checkbox"
-                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <label for="remember" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                                Запомнить меня
-                            </label>
-                        </div>
-
+                        <CheckboxInput v-model="form.remember" label="Запомнить меня" />
                         <div class="text-sm">
                             <a href="#" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
                                 Забыли пароль?
@@ -182,22 +91,7 @@
 
                     <!-- Кнопка отправки -->
                     <div>
-                        <button
-                            type="submit"
-                            :disabled="isLoading"
-                            class="btn-primary w-full flex items-center justify-center space-x-2"
-                        >
-                            <div v-if="isLoading" class="flex items-center space-x-2">
-                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>{{ isLoading ? (isLoginMode ? 'Вход...' : 'Регистрация...') : (isLoginMode ? 'Войти' : 'Зарегистрироваться') }}</span>
-                            </div>
-                            <div v-else class="flex items-center space-x-2">
-                                <span>{{ isLoginMode ? 'Войти' : 'Зарегистрироваться' }}</span>
-                            </div>
-                        </button>
+                        <ButtonPrimary type="submit" :disabled="isLoading" class="w-full">{{ isLoading ? (isLoginMode ? 'Вход...' : 'Регистрация...') : (isLoginMode ? 'Войти' : 'Зарегистрироваться') }}</ButtonPrimary>
                     </div>
                 </form>
 
@@ -243,68 +137,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Уведомления -->
-            <TransitionRoot appear :show="!!notification" as="template">
-                <Dialog as="div" @close="closeNotification" class="relative z-50">
-                    <TransitionChild
-                        as="template"
-                        enter="duration-300 ease-out"
-                        enter-from="opacity-0"
-                        enter-to="opacity-100"
-                        leave="duration-200 ease-in"
-                        leave-from="opacity-100"
-                        leave-to="opacity-0"
-                    >
-                        <div class="fixed inset-0 bg-black bg-opacity-25" />
-                    </TransitionChild>
-
-                    <div class="fixed inset-0 overflow-y-auto">
-                        <div class="flex min-h-full items-center justify-center p-4 text-center">
-                            <TransitionChild
-                                as="template"
-                                enter="duration-300 ease-out"
-                                enter-from="opacity-0 scale-95"
-                                enter-to="opacity-100 scale-100"
-                                leave="duration-200 ease-in"
-                                leave-from="opacity-100 scale-100"
-                                leave-to="opacity-0 scale-95"
-                            >
-                                <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                                    <div class="flex items-center space-x-3">
-                                        <div v-if="notification?.type === 'success'" class="flex-shrink-0">
-                                            <CheckCircleIcon class="h-6 w-6 text-green-400" />
-                                        </div>
-                                        <div v-else-if="notification?.type === 'error'" class="flex-shrink-0">
-                                            <ExclamationCircleIcon class="h-6 w-6 text-red-400" />
-                                        </div>
-                                        <div class="flex-1">
-                                            <DialogTitle as="h3" class="text-lg font-medium text-gray-900 dark:text-white">
-                                                {{ notification?.title }}
-                                            </DialogTitle>
-                                            <div class="mt-2">
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ notification?.message }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <button
-                                            type="button"
-                                            class="btn-secondary w-full"
-                                            @click="closeNotification"
-                                        >
-                                            Закрыть
-                                        </button>
-                                    </div>
-                                </DialogPanel>
-                            </TransitionChild>
-                        </div>
-                    </div>
-                </Dialog>
-            </TransitionRoot>
         </div>
     </div>
 </template>
@@ -313,23 +145,11 @@
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { z } from 'zod';
-import { useVModel } from '@vueuse/core';
-import {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    TransitionRoot,
-    TransitionChild,
-} from '@headlessui/vue';
-import {
-    UserIcon,
-    EnvelopeIcon,
-    LockClosedIcon,
-    EyeIcon,
-    EyeSlashIcon,
-    CheckCircleIcon,
-    ExclamationCircleIcon,
-} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import TextInput from '@/components/inputs/TextInput.vue';
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 // Схемы валидации
 const loginSchema = z.object({
@@ -354,11 +174,7 @@ const isLoginMode = ref(true);
 const isLoading = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
-const notification = ref<{
-    type: 'success' | 'error';
-    title: string;
-    message: string;
-} | null>(null);
+const { show: toast } = useToast();
 
 const form = reactive({
     name: '',
@@ -427,21 +243,9 @@ const validateForm = () => {
     }
 };
 
-const showNotification = (type: 'success' | 'error', title: string, message: string) => {
-    notification.value = { type, title, message };
-};
-
-const closeNotification = () => {
-    notification.value = null;
-};
-
 const handleSubmit = async () => {
-    if (!validateForm()) {
-        return;
-    }
-
+    if (!validateForm()) return;
     isLoading.value = true;
-
     try {
         const data = isLoginMode.value 
             ? { email: form.email, password: form.password, remember: form.remember }
@@ -451,21 +255,13 @@ const handleSubmit = async () => {
         
         // Используем Inertia для отправки формы
         router.post(endpoint, data, {
-            onSuccess: () => {
-                showNotification('success', 'Успешно!', isLoginMode.value ? 'Вы успешно вошли в систему' : 'Аккаунт успешно создан');
-            },
-            onError: (errors) => {
-                // Обновляем ошибки из ответа сервера
-                Object.assign(errors, errors);
-                showNotification('error', 'Ошибка', 'Проверьте правильность введенных данных');
-            },
-            onFinish: () => {
-                isLoading.value = false;
-            }
+            onSuccess: () => toast(isLoginMode.value ? 'Вы успешно вошли' : 'Аккаунт создан', 'success'),
+            onError: () => toast('Проверьте правильность введенных данных', 'error'),
+            onFinish: () => { isLoading.value = false; },
         });
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showNotification('error', 'Ошибка', 'Ошибка соединения с сервером');
+    } catch (e) {
+        console.error(e);
+        toast('Ошибка соединения с сервером', 'error');
         isLoading.value = false;
     }
 };
@@ -477,13 +273,4 @@ const loginWithGoogle = () => {
 const loginWithGithub = () => {
     window.location.href = '/auth/github';
 };
-
-// Автоматическое закрытие уведомлений
-watch(notification, (newNotification) => {
-    if (newNotification) {
-        setTimeout(() => {
-            closeNotification();
-        }, 5000);
-    }
-});
 </script> 

@@ -81,68 +81,12 @@
                         </div>
                         
                         <form @submit.prevent="updateProfile" class="profile-form">
-                            <div class="form-group">
-                                <label for="name" class="form-label">Имя</label>
-                                <input
-                                    id="name"
-                                    v-model="form.name"
-                                    type="text"
-                                    class="form-input"
-                                    required
-                                />
-                                <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email" class="form-label">Email</label>
-                                <input
-                                    id="email"
-                                    v-model="form.email"
-                                    type="email"
-                                    class="form-input"
-                                    required
-                                />
-                                <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="current_password" class="form-label">Текущий пароль</label>
-                                <input
-                                    id="current_password"
-                                    v-model="form.current_password"
-                                    type="password"
-                                    class="form-input"
-                                />
-                                <span v-if="errors.current_password" class="error-message">{{ errors.current_password }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="new_password" class="form-label">Новый пароль</label>
-                                <input
-                                    id="new_password"
-                                    v-model="form.new_password"
-                                    type="password"
-                                    class="form-input"
-                                />
-                                <span v-if="errors.new_password" class="error-message">{{ errors.new_password }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="new_password_confirmation" class="form-label">Подтверждение пароля</label>
-                                <input
-                                    id="new_password_confirmation"
-                                    v-model="form.new_password_confirmation"
-                                    type="password"
-                                    class="form-input"
-                                />
-                                <span v-if="errors.new_password_confirmation" class="error-message">{{ errors.new_password_confirmation }}</span>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn-primary" :disabled="isLoading">
-                                    {{ isLoading ? 'Сохранение...' : 'Сохранить изменения' }}
-                                </button>
-                            </div>
+                            <div class="form-group"><TextInput id="name" v-model="form.name" label="Имя" required /></div>
+                            <div class="form-group"><TextInput id="email" v-model="form.email" label="Email" type="email" required /></div>
+                            <div class="form-group"><TextInput id="current_password" v-model="form.current_password" label="Текущий пароль" type="password" /></div>
+                            <div class="form-group"><TextInput id="new_password" v-model="form.new_password" label="Новый пароль" type="password" /></div>
+                            <div class="form-group"><TextInput id="new_password_confirmation" v-model="form.new_password_confirmation" label="Подтверждение пароля" type="password" /></div>
+                            <div class="form-actions"><ButtonPrimary type="submit" :disabled="isLoading">{{ isLoading ? 'Сохранение...' : 'Сохранить изменения' }}</ButtonPrimary></div>
                         </form>
                     </div>
                 </div>
@@ -159,22 +103,12 @@
                             <div v-if="recentSnippets && recentSnippets.length > 0">
                                 <div v-for="snippet in recentSnippets" :key="snippet.id" class="snippet-item">
                                     <div class="snippet-info">
-                                        <h3 class="snippet-title">
-                                            <a :href="`/code/${snippet.hash}`" class="snippet-link">
-                                                {{ snippet.content.substring(0, 30) }}...
-                                            </a>
-                                        </h3>
-                                        <div class="snippet-meta">
-                                            <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
-                                            <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
-                                        </div>
+                                        <h3 class="snippet-title"><Link :href="`/code/${snippet.hash}`" class="snippet-link">{{ snippet.content.substring(0, 30) }}...</Link></h3>
+                                        <div class="snippet-meta"><span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span><span class="snippet-date">{{ formatDate(snippet.created_at) }}</span></div>
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="empty-section">
-                                <p>У вас пока нет сниппетов</p>
-                                <Link href="/" class="btn-primary">Создать первый</Link>
-                            </div>
+                            <div v-else class="empty-section"><p>У вас пока нет сниппетов</p><Link href="/" class="btn-primary">Создать первый</Link></div>
                         </div>
                     </div>
                 </div>
@@ -191,9 +125,7 @@
                                 Удаление аккаунта необратимо. Все ваши сниппеты будут удалены.
                             </p>
                             
-                            <button @click="showDeleteModal = true" class="btn-danger">
-                                Удалить аккаунт
-                            </button>
+                            <ButtonSecondary @click="showDeleteModal = true">Удалить аккаунт</ButtonSecondary>
                         </div>
                     </div>
                 </div>
@@ -205,37 +137,15 @@
             <div class="modal-content" @click.stop>
                 <div class="modal-header">
                     <h3 class="modal-title">Удалить аккаунт</h3>
-                    <button @click="showDeleteModal = false" class="modal-close">
-                        <svg class="modal-close-icon" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
+                    <button @click="showDeleteModal = false" class="modal-close"><svg class="modal-close-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
                 </div>
                 
                 <div class="modal-body">
                     <p>Это действие необратимо. Все ваши сниппеты будут удалены.</p>
                     
                     <form @submit.prevent="deleteAccount" class="delete-form">
-                        <div class="form-group">
-                            <label for="delete_password" class="form-label">Введите пароль для подтверждения</label>
-                            <input
-                                id="delete_password"
-                                v-model="deleteForm.password"
-                                type="password"
-                                class="form-input"
-                                required
-                            />
-                            <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-                        </div>
-                        
-                        <div class="modal-actions">
-                            <button type="button" @click="showDeleteModal = false" class="btn-secondary">
-                                Отмена
-                            </button>
-                            <button type="submit" class="btn-danger" :disabled="isDeleting">
-                                {{ isDeleting ? 'Удаление...' : 'Удалить аккаунт' }}
-                            </button>
-                        </div>
+                        <div class="form-group"><TextInput id="delete_password" v-model="deleteForm.password" type="password" label="Введите пароль для подтверждения" required /></div>
+                        <div class="modal-actions"><ButtonSecondary type="button" @click="showDeleteModal = false">Отмена</ButtonSecondary><ButtonPrimary type="submit" :disabled="isDeleting">{{ isDeleting ? 'Удаление...' : 'Удалить аккаунт' }}</ButtonPrimary></div>
                     </form>
                 </div>
             </div>
@@ -247,12 +157,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref, reactive } from 'vue';
+import { router, Link } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
-import { Link } from '@inertiajs/vue3';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+import { useToast } from '@/composables/useToast';
 
 // Props от Inertia.js
 interface Props {
@@ -288,6 +201,7 @@ const errors = reactive({
     new_password_confirmation: '',
     password: ''
 });
+const { show: toast } = useToast();
 
 const updateProfile = async () => {
     isLoading.value = true;
@@ -299,16 +213,14 @@ const updateProfile = async () => {
                 form.current_password = '';
                 form.new_password = '';
                 form.new_password_confirmation = '';
+                toast('Профиль обновлён', 'success');
             },
-            onError: (errors) => {
-                Object.assign(errors, errors);
-            },
-            onFinish: () => {
-                isLoading.value = false;
-            }
+            onError: (e) => { Object.assign(errors, e); toast('Проверьте данные', 'error'); },
+            onFinish: () => { isLoading.value = false; },
         });
     } catch (error) {
         console.error('Ошибка:', error);
+        toast('Ошибка соединения', 'error');
         isLoading.value = false;
     }
 };
@@ -319,27 +231,17 @@ const deleteAccount = async () => {
     try {
         await router.delete('/profile', {
             data: deleteForm,
-            onError: (errors) => {
-                Object.assign(errors, errors);
-            },
-            onFinish: () => {
-                isDeleting.value = false;
-            }
+            onError: (e) => { Object.assign(errors, e); toast('Неверный пароль', 'error'); },
+            onFinish: () => { isDeleting.value = false; },
         });
     } catch (error) {
         console.error('Ошибка:', error);
+        toast('Ошибка соединения', 'error');
         isDeleting.value = false;
     }
 };
 
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-};
+const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
 </script>
 
 <style scoped>
