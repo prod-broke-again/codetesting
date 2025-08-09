@@ -133,3 +133,6 @@ $RECYCLE.BIN/
 
 # Internal documentation
 RULES.md
+
+# Assistant internal rules (do not commit)
+dev/assistant_rules.md
