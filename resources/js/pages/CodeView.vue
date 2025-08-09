@@ -104,14 +104,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button
-                                    v-if="canEdit && !editMode"
-                                    @click="startEdit"
-                                    class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                                    title="Редактировать"
-                                >
-                                    Редактировать
-                                </button>
+                                <ButtonPrimary v-if="canEdit && !editMode" @click="startEdit">Редактировать</ButtonPrimary>
                                 <button
                                     @click="copyCode"
                                     class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
@@ -137,32 +130,29 @@
                     <div class="p-6">
                         <!-- Просмотр -->
                         <div v-if="!editMode">
-                            <pre><code ref="codeEl" class="hljs block bg-gray-900 text-gray-100 rounded-xl p-6 overflow-x-auto text-sm font-mono leading-relaxed" :class="hljsLanguageClass">{{ snippet.content }}</code></pre>
+                            <div class="snippet-preview">
+                                <pre><code ref="codeEl" class="hljs block p-6 overflow-x-auto text-sm font-mono leading-relaxed" :class="[hljsLanguageClass, currentThemeClass]">{{ snippet.content }}</code></pre>
+                            </div>
                         </div>
                         <!-- Редактирование -->
                         <div v-else class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Язык</label>
-                                    <select v-model="selectedLanguage" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-                                        <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">{{ label }}</option>
-                                    </select>
+                                    <SelectInput :model-value="selectedLanguage" @update:modelValue="(v:string)=> selectedLanguage=v" :options="languageOptions" />
                                 </div>
                                 <div>
                                     <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Тема</label>
-                                    <select v-model="selectedTheme" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-                                        <option v-for="theme in editorThemeOptions" :key="theme.value" :value="theme.value">{{ theme.label }}</option>
-                                    </select>
+                                    <SelectInput :model-value="selectedTheme" @update:modelValue="(v:string)=> selectedTheme=v" :options="editorThemeOptions" />
                                 </div>
                                 <div v-if="needEditToken" class="md:col-span-1">
-                                    <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Токен редактирования</label>
-                                    <input v-model="editToken" type="text" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm" placeholder="tk_..." />
+                                    <TextInput id="edit_token" v-model="editToken" label="Токен редактирования" placeholder="tk_..." />
                                 </div>
                             </div>
                             <div ref="editorContainer" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
                             <div class="flex items-center justify-end space-x-3">
-                                <button @click="cancelEdit" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition">Отмена</button>
-                                <button @click="saveEdit" :disabled="saving" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-60">Сохранить</button>
+                                <ButtonSecondary type="button" @click="cancelEdit">Отмена</ButtonSecondary>
+                                <ButtonPrimary type="button" @click="saveEdit" :disabled="saving">{{ saving ? 'Сохранение...' : 'Сохранить' }}</ButtonPrimary>
                             </div>
                         </div>
                     </div>
@@ -170,33 +160,22 @@
 
                 <!-- Действия -->
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <button
-                        @click="copyCode"
-                        class="btn-primary flex items-center space-x-2"
-                    >
+                    <ButtonPrimary type="button" @click="copyCode" class="flex items-center space-x-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                             <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                         </svg>
                         <span>Копировать код</span>
-                    </button>
+                    </ButtonPrimary>
                     
-                    <button
-                        @click="copyUrl"
-                        class="btn-secondary flex items-center space-x-2"
-                    >
+                    <ButtonSecondary type="button" @click="copyUrl" class="flex items-center space-x-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                         </svg>
                         <span>Поделиться</span>
-                    </button>
+                    </ButtonSecondary>
                     
-                    <Link href="/" class="btn-secondary flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        <span>Создать новый</span>
-                    </Link>
+                    <Link href="/"><ButtonSecondary class="flex items-center space-x-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg><span>Создать новый</span></ButtonSecondary></Link>
                 </div>
 
                 <!-- Информация о времени жизни -->
@@ -228,6 +207,10 @@ import { updateSnippet as updateSnippetApi, type UpdateSnippetPayload } from '@/
 import { snippetRepository } from '@/repositories/snippetRepository';
 import { useToast } from '@/composables/useToast';
 import { useThemeStore } from '@/stores/theme';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -243,6 +226,8 @@ const editorThemeOptions = computed(() => [
     { value: 'vs-dark', label: (THEME_OPTIONS as any)['vs-dark'] || 'VS Code Dark' },
     { value: 'vs-light', label: (THEME_OPTIONS as any)['vs-light'] || 'VS Code Light' },
 ]);
+
+const languageOptions = computed(() => Object.entries(LANGUAGE_OPTIONS).map(([value, label]) => ({ value, label })));
 
 const hljsLanguageClass = computed(() => {
     const map: Record<string, string> = {
@@ -281,6 +266,7 @@ const highlight = () => {
 
 const { show: toast } = useToast();
 const themeStore = useThemeStore();
+const currentThemeClass = computed(() => (themeStore.currentTheme === 'dark' || themeStore.currentTheme === 'space' || themeStore.currentTheme === 'fire') ? 'bg-gray-900 text-gray-100 rounded-xl' : 'bg-white text-gray-900 rounded-xl');
 
 // ===== Редактирование =====
 const editMode = ref(false);
