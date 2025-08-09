@@ -229,6 +229,7 @@ const getThemeName = (theme: string | unknown): string => {
   const key = (theme as any)?.toString?.() ?? '';
   return (THEME_OPTIONS as any)[key] || key;
 };
+const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' });
 
 const codeEl = ref<HTMLElement | null>(null);
 
