@@ -23,7 +23,7 @@
       </div>
       <div class="modal-footer">
         <ButtonSecondary @click="$emit('close')">Отмена</ButtonSecondary>
-        <ButtonPrimary :disabled="saving" @click="onSave">Сохранить</ButtonPrimary>
+        <ButtonPrimary :disabled="saving" :busy="saving" @click="onSave">Сохранить</ButtonPrimary>
       </div>
     </div>
   </div>
