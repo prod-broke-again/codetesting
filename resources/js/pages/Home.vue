@@ -226,13 +226,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref, reactive } from 'vue';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
+import { usePage } from '@inertiajs/vue3';
 
 // Props от Inertia.js
 interface Props {
@@ -271,19 +271,12 @@ const onCodeInput = () => {
         const confidenceValue = getDetectionConfidence(form.content, result);
         detectionConfidence.value = confidenceValue;
         confidence.value = confidenceValue;
-        alternativeLanguages.value = getAlternativeLanguages(form.content);
+        alternativeLanguages.value = getAlternativeLanguages(form.content, result);
         
         if (confidenceValue > 60) {
             form.language = result as ProgrammingLanguage;
         }
     }, 500);
-};
-
-const autoDetectLanguage = () => {
-    const result = detectLanguage(form.content);
-    detectedLanguage.value = result;
-    detectionConfidence.value = getDetectionConfidence(form.content, result);
-    form.language = result as ProgrammingLanguage;
 };
 
 const createSnippet = async (): Promise<void> => {
@@ -319,7 +312,11 @@ const createSnippet = async (): Promise<void> => {
             expires_at: expiresAt
         };
 
-        const response = await fetch('/api/snippets', {
+        const page = usePage();
+        const isAuthenticated = !!page.props.user;
+        const url = isAuthenticated ? '/snippets' : '/api/snippets';
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -332,10 +329,20 @@ const createSnippet = async (): Promise<void> => {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            window.location.href = `/code/${data.data.hash}`;
+            const contentType = response.headers.get('Content-Type') || '';
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                // Если гость получил edit_token — сохраним для будущего редактирования
+                const snippet = data?.data;
+                if (snippet?.is_guest && snippet?.edit_token && snippet?.hash) {
+                    localStorage.setItem(`edit_token:${snippet.hash}`, snippet.edit_token);
+                }
+                window.location.href = `/code/${snippet.hash}`;
+            } else {
+                // Если это не JSON (возможно редирект HTML), используем конечный URL
+                window.location.href = response.url;
+            }
         } else {
-            // Пытаемся прочитать JSON, иначе показываем текст
             const text = await response.text();
             try {
                 const err = JSON.parse(text);
@@ -352,9 +359,7 @@ const createSnippet = async (): Promise<void> => {
         isLoading.value = false;
     }
 };
-
-
-</script> 
+</script>
 
 <style scoped>
 .home-container {

@@ -67,9 +67,9 @@
                         <div class="snippet-header">
                             <div class="snippet-info">
                                 <h3 class="snippet-title">
-                                    <a :href="`/code/${snippet.hash}`" class="snippet-link">
+                                    <Link :href="`/code/${snippet.hash}`" class="snippet-link">
                                         {{ snippet.content.substring(0, 50) }}...
-                                    </a>
+                                    </Link>
                                 </h3>
                                 <div class="snippet-meta">
                                     <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
@@ -81,16 +81,16 @@
                                 </div>
                             </div>
                             <div class="snippet-actions">
-                                <a :href="`/code/${snippet.hash}`" class="btn-secondary">
+                                <Link :href="`/code/${snippet.hash}`" class="btn-secondary">
                                     Просмотреть
-                                </a>
-                                <button @click="editSnippet(snippet)" class="btn-primary">
+                                </Link>
+                                <button @click="openEditor(snippet)" class="btn-primary">
                                     Редактировать
                                 </button>
                             </div>
                         </div>
                         <div class="snippet-preview">
-                            <pre class="snippet-code">{{ snippet.content.substring(0, 200) }}...</pre>
+                            <pre><code class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                     <p class="empty-description">
                         Создайте свой первый сниппет и поделитесь кодом с миром
                     </p>
-                    <a href="/" class="btn-primary">Создать сниппет</a>
+                    <Link href="/" class="btn-primary">Создать сниппет</Link>
                 </div>
             </div>
 
@@ -118,15 +118,51 @@
 
         <!-- Футер -->
         <Footer />
+
+        <!-- Модальное окно редактора -->
+        <div v-if="modalOpen" class="modal-backdrop" @click.self="closeEditor">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">Редактирование сниппета</div>
+                    <button class="modal-close" @click="closeEditor">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Язык</label>
+                            <select v-model="edit.language" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
+                                <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">{{ label }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Тема</label>
+                            <select v-model="edit.theme" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
+                                <option value="vs-dark">VS Code Dark</option>
+                                <option value="vs-light">VS Code Light</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div ref="editorContainer" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" @click="closeEditor">Отмена</button>
+                    <button class="btn-primary" :disabled="saving" @click="saveEdit">Сохранить</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, onMounted, onUpdated, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
+import { Link } from '@inertiajs/vue3';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
+import * as monaco from 'monaco-editor';
 
 // Props от Inertia.js
 interface Props {
@@ -195,9 +231,102 @@ const getPrivacyLabel = (privacy: string) => {
     return labels[privacy] || privacy;
 };
 
-const editSnippet = (snippet: any) => {
-    // Здесь будет логика редактирования
-    console.log('Редактирование сниппета:', snippet);
+const hljsClass = (lang: string) => {
+    const map: Record<string, string> = {
+        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'xml', css: 'css', sql: 'sql', bash: 'bash', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'vue', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'xml', 'html-js': 'xml'
+    };
+    const key = (lang || '').toString().toLowerCase();
+    return map[key] ? `language-${map[key]}` : '';
+};
+
+const highlight = () => {
+    document.querySelectorAll('code.hljs').forEach((el) => hljs.highlightElement(el as HTMLElement));
+};
+
+onMounted(highlight);
+onUpdated(highlight);
+
+// ===== Редактор (модалка) =====
+const modalOpen = ref(false);
+const editorContainer = ref<HTMLElement | null>(null);
+let editor: monaco.editor.IStandaloneCodeEditor | null = null;
+const editingSnippet = ref<any>(null);
+const edit = ref<{ content: string; language: string; theme: string }>({ content: '', language: 'php', theme: 'vs-dark' });
+const saving = ref(false);
+
+const toMonacoLanguage = (lang: string) => {
+    const map: Record<string, string> = {
+        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'html', css: 'css', sql: 'sql', bash: 'shell', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'html', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'html', 'html-js': 'html'
+    };
+    const key = (lang || '').toString().toLowerCase();
+    return map[key] || 'plaintext';
+};
+
+const toMonacoTheme = (theme: string) => (theme === 'vs-light' ? 'vs' : 'vs-dark');
+
+const openEditor = async (snippet: any) => {
+    editingSnippet.value = snippet;
+    edit.value = {
+        content: snippet.content,
+        language: snippet.language,
+        theme: snippet.theme === 'vs-light' ? 'vs-light' : 'vs-dark'
+    };
+    modalOpen.value = true;
+    await nextTick();
+    editor = monaco.editor.create(editorContainer.value as HTMLElement, {
+        value: edit.value.content,
+        language: toMonacoLanguage(edit.value.language),
+        theme: toMonacoTheme(edit.value.theme),
+        automaticLayout: true,
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+    });
+};
+
+const closeEditor = () => {
+    if (editor) {
+        editor.dispose();
+        editor = null;
+    }
+    modalOpen.value = false;
+};
+
+const saveEdit = async () => {
+    if (!editor || !editingSnippet.value) return;
+    try {
+        saving.value = true;
+        const payload: Record<string, any> = {
+            content: editor.getValue(),
+            language: edit.value.language,
+            theme: edit.value.theme,
+        };
+        const response = await fetch(`/api/snippets/${editingSnippet.value.hash}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Save error:', text);
+            alert('Не удалось сохранить сниппет');
+            return;
+        }
+        // Обновим локально превью
+        editingSnippet.value.content = payload.content;
+        closeEditor();
+    } catch (e) {
+        console.error(e);
+        alert('Ошибка сохранения');
+    } finally {
+        saving.value = false;
+    }
 };
 </script>
 
@@ -345,22 +474,11 @@ const editSnippet = (snippet: any) => {
     font-weight: 500;
 }
 
-.privacy-private {
-    color: var(--color-warning);
-}
+.privacy-private { color: var(--color-warning); }
+.privacy-unlisted { color: var(--color-info); }
+.privacy-public { color: var(--color-success); }
 
-.privacy-unlisted {
-    color: var(--color-info);
-}
-
-.privacy-public {
-    color: var(--color-success);
-}
-
-.snippet-actions {
-    display: flex;
-    gap: 0.5rem;
-}
+.snippet-actions { display: flex; gap: 0.5rem; }
 
 .btn-secondary, .btn-primary {
     padding: 0.5rem 1rem;
@@ -378,63 +496,46 @@ const editSnippet = (snippet: any) => {
     border: 1px solid var(--color-border);
 }
 
-.btn-secondary:hover {
-    background-color: var(--color-border);
-}
+.btn-secondary:hover { background-color: var(--color-border); }
 
-.btn-primary {
-    background: var(--gradient-primary);
-    color: white;
-}
+.btn-primary { background: var(--gradient-primary); color: white; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 
-.btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
+.snippet-preview { background-color: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border); overflow: hidden; }
 
-.snippet-preview {
-    background-color: var(--color-surface);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    border: 1px solid var(--color-border);
-}
-
-.snippet-code {
+/* Стили теперь применяются к code.snippet-code, а не к pre */
+code.snippet-code {
+    display: block;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--color-textSecondary);
-    margin: 0;
     white-space: pre-wrap;
     overflow: hidden;
 }
 
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
+/* Модалка */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1rem;
 }
-
-.empty-icon {
-    width: 4rem;
-    height: 4rem;
-    margin: 0 auto 1.5rem;
-    color: var(--color-textSecondary);
-}
-
-.empty-svg {
+.modal-card {
     width: 100%;
-    height: 100%;
+    max-width: 960px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
 }
-
-.empty-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 0.5rem;
-}
-
-.empty-description {
-    color: var(--color-textSecondary);
-    margin-bottom: 1.5rem;
-}
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); }
+.modal-title { font-weight: 600; }
+.modal-close { background: transparent; border: none; font-size: 1.25rem; cursor: pointer; }
+.modal-body { padding: 1rem; }
+.modal-footer { padding: 0.75rem 1rem; display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--color-border); }
 </style> 

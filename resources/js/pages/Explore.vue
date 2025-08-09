@@ -57,24 +57,24 @@
                         <div class="snippet-header">
                             <div class="snippet-info">
                                 <h3 class="snippet-title">
-                                    <a :href="`/code/${snippet.hash}`" class="snippet-link">
+                                    <Link :href="`/code/${snippet.hash}`" class="snippet-link">
                                         {{ snippet.content.substring(0, 50) }}...
-                                    </a>
+                                    </Link>
                                 </h3>
                                 <div class="snippet-meta">
-                                    <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language] || snippet.language }}</span>
+                                    <span class="snippet-language">{{ (LANGUAGE_OPTIONS as any)[snippet.language] || snippet.language }}</span>
                                     <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
                                     <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
                                 </div>
                             </div>
                             <div class="snippet-actions">
-                                <a :href="`/code/${snippet.hash}`" class="btn-secondary">
+                                <Link :href="`/code/${snippet.hash}`" class="btn-secondary">
                                     Просмотреть
-                                </a>
+                                </Link>
                             </div>
                         </div>
                         <div class="snippet-preview">
-                            <pre class="snippet-code">{{ snippet.content.substring(0, 200) }}...</pre>
+                            <pre><code class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                     <p class="empty-description">
                         Попробуйте изменить фильтры или создать первый сниппет
                     </p>
-                    <a href="/" class="btn-primary">Создать сниппет</a>
+                    <Link href="/" class="btn-primary">Создать сниппет</Link>
                 </div>
             </div>
 
@@ -106,11 +106,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, onMounted, onUpdated } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
+import { Link } from '@inertiajs/vue3';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
 
 // Props от Inertia.js
 interface Props {
@@ -164,6 +167,21 @@ const formatDate = (dateString: string) => {
         day: 'numeric'
     });
 };
+
+const hljsClass = (lang: string) => {
+    const map: Record<string, string> = {
+        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'xml', css: 'css', sql: 'sql', bash: 'bash', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'vue', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'xml', 'html-js': 'xml'
+    };
+    const key = (lang || '').toString().toLowerCase();
+    return map[key] ? `language-${map[key]}` : '';
+};
+
+const highlight = () => {
+    document.querySelectorAll('code.hljs').forEach((el) => hljs.highlightElement(el as HTMLElement));
+};
+
+onMounted(highlight);
+onUpdated(highlight);
 </script>
 
 <style scoped>
@@ -328,16 +346,17 @@ const formatDate = (dateString: string) => {
 .snippet-preview {
     background-color: var(--color-surface);
     border-radius: 0.5rem;
-    padding: 1rem;
     border: 1px solid var(--color-border);
+    overflow: hidden;
 }
 
-.snippet-code {
+/* Стили теперь применяются к code.snippet-code, а не к pre */
+code.snippet-code {
+    display: block;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--color-textSecondary);
-    margin: 0;
     white-space: pre-wrap;
     overflow: hidden;
 }

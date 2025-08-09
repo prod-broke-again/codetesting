@@ -25,6 +25,9 @@ use App\Http\Controllers\ExportController;
 // Главная страница (создание сниппета)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Создание сниппета (через web-сессию)
+Route::post('/snippets', [CodeController::class, 'store'])->name('snippets.store');
+
 // Обзор публичных сниппетов
 Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
 

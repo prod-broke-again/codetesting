@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Code;
+use App\Http\Requests\CreateSnippetRequest;
+use App\Http\Resources\CodeResource;
 use App\Services\CodeService;
 use App\Contracts\CodeRepositoryInterface;
 use App\ValueObjects\SnippetHash;
@@ -16,6 +17,41 @@ class CodeController extends Controller
         private CodeService $codeService,
         private CodeRepositoryInterface $codeRepository
     ) {}
+
+    /**
+     * Создание сниппета (web)
+     */
+    public function store(CreateSnippetRequest $request)
+    {
+        try {
+            $code = $this->codeService->createSnippet(
+                $request->validated(),
+                $request->user()
+            );
+
+            // Если клиент ожидает JSON (fetch), возвращаем JSON-ответ
+            if ($request->wantsJson()) {
+                return $this->successResponse(
+                    data: new CodeResource($code),
+                    message: 'Сниппет создан',
+                    status: 201
+                );
+            }
+
+            // Иначе обычный редирект (для форм без fetch)
+            return redirect()->to('/code/' . $code->hash);
+        } catch (Exception $e) {
+            if ($request->wantsJson()) {
+                return $this->handleException(
+                    exception: $e,
+                    context: 'Создание сниппета (web-json)',
+                    extraData: ['user_id' => $request->user()?->id]
+                );
+            }
+
+            return back()->withErrors(['error' => 'Ошибка создания сниппета']);
+        }
+    }
 
     /**
      * Показать страницу просмотра сниппета
@@ -54,7 +90,9 @@ class CodeController extends Controller
                     'access_count' => $code->access_count,
                     'created_at' => $code->created_at,
                     'expires_at' => $code->expires_at,
-                    'is_guest' => $code->is_guest
+                    'is_guest' => $code->is_guest,
+                    'user_id' => $code->user_id,
+                    'privacy' => $code->privacy,
                 ]
             ]);
         } catch (Exception $e) {

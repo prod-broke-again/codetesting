@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                <!-- Код сниппета -->
+                <!-- Код сниппета / Редактор -->
                 <div class="card overflow-hidden">
                     <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
                         <div class="flex items-center justify-between">
@@ -104,6 +104,14 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
+                                <button
+                                    v-if="canEdit && !editMode"
+                                    @click="startEdit"
+                                    class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                    title="Редактировать"
+                                >
+                                    Редактировать
+                                </button>
                                 <button
                                     @click="copyCode"
                                     class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
@@ -127,7 +135,36 @@
                         </div>
                     </div>
                     <div class="p-6">
-                        <pre class="bg-gray-900 text-gray-100 rounded-xl p-6 overflow-x-auto text-sm font-mono leading-relaxed"><code>{{ snippet.content }}</code></pre>
+                        <!-- Просмотр -->
+                        <div v-if="!editMode">
+                            <pre><code ref="codeEl" class="hljs block bg-gray-900 text-gray-100 rounded-xl p-6 overflow-x-auto text-sm font-mono leading-relaxed" :class="hljsLanguageClass">{{ snippet.content }}</code></pre>
+                        </div>
+                        <!-- Редактирование -->
+                        <div v-else class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Язык</label>
+                                    <select v-model="selectedLanguage" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
+                                        <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">{{ label }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Тема</label>
+                                    <select v-model="selectedTheme" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
+                                        <option v-for="theme in editorThemeOptions" :key="theme.value" :value="theme.value">{{ theme.label }}</option>
+                                    </select>
+                                </div>
+                                <div v-if="needEditToken" class="md:col-span-1">
+                                    <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Токен редактирования</label>
+                                    <input v-model="editToken" type="text" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm" placeholder="tk_..." />
+                                </div>
+                            </div>
+                            <div ref="editorContainer" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
+                            <div class="flex items-center justify-end space-x-3">
+                                <button @click="cancelEdit" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition">Отмена</button>
+                                <button @click="saveEdit" :disabled="saving" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-60">Сохранить</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -183,6 +220,10 @@ import type { CodeSnippet } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import { Link } from '@inertiajs/vue3';
+import { onMounted, onUpdated, onBeforeUnmount, ref, computed, watch, nextTick } from 'vue';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
+import * as monaco from 'monaco-editor';
 
 // Props от Inertia.js
 interface Props {
@@ -192,12 +233,62 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+const codeEl = ref<HTMLElement | null>(null);
+
+const editorThemeOptions = computed(() => [
+    { value: 'vs-dark', label: (THEME_OPTIONS as any)['vs-dark'] || 'VS Code Dark' },
+    { value: 'vs-light', label: (THEME_OPTIONS as any)['vs-light'] || 'VS Code Light' },
+]);
+
+const hljsLanguageClass = computed(() => {
+    const map: Record<string, string> = {
+        php: 'php',
+        javascript: 'javascript',
+        typescript: 'typescript',
+        python: 'python',
+        java: 'java',
+        cpp: 'cpp',
+        csharp: 'csharp',
+        html: 'xml',
+        css: 'css',
+        sql: 'sql',
+        bash: 'bash',
+        json: 'json',
+        xml: 'xml',
+        markdown: 'markdown',
+        vue: 'vue',
+        jsx: 'javascript',
+        tsx: 'typescript',
+        blade: 'php',
+        'php-html': 'php',
+        'php-blade': 'php',
+        'html-css': 'xml',
+        'html-js': 'xml'
+    };
+    const lang = (props.snippet.language as any)?.toString?.().toLowerCase?.() || '';
+    return map[lang] ? `language-${map[lang]}` : '';
+});
+
+const highlight = () => {
+    if (codeEl.value) {
+        hljs.highlightElement(codeEl.value as HTMLElement);
+    }
+};
+
+onMounted(() => {
+    highlight();
+});
+
+onUpdated(() => {
+    highlight();
+});
+
 const getLanguageName = (language: string): string => {
-    return LANGUAGE_OPTIONS[language] || language;
+    return (LANGUAGE_OPTIONS as any)[language] || language;
 };
 
 const getThemeName = (theme: string): string => {
-    return THEME_OPTIONS[theme] || theme;
+    return (THEME_OPTIONS as any)[theme] || theme;
 };
 
 const formatDate = (dateString: string): string => {
@@ -213,8 +304,7 @@ const formatDate = (dateString: string): string => {
 
 const copyCode = async () => {
     try {
-        await navigator.clipboard.writeText(props.snippet.content);
-        // Показываем уведомление об успехе
+        await navigator.clipboard.writeText((props.snippet.content as any) ?? '');
         showNotification('Код скопирован в буфер обмена', 'success');
     } catch (err) {
         console.error('Ошибка копирования:', err);
@@ -234,20 +324,172 @@ const copyUrl = async () => {
 };
 
 const showNotification = (message: string, type: 'success' | 'error') => {
-    // Создаем уведомление
     const notification = document.createElement('div');
     notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ${
-        type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-red-500 text-white'
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
     }`;
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    // Удаляем уведомление через 3 секунды
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 };
+
+// ===== Редактирование =====
+const editMode = ref(false);
+const editorContainer = ref<HTMLElement | null>(null);
+let editorInstance: monaco.editor.IStandaloneCodeEditor | null = null;
+const selectedLanguage = ref<string>((props.snippet.language as any)?.toString?.() || 'php');
+const initialTheme = ((props.snippet.theme as any)?.toString?.() === 'vs-light') ? 'vs-light' : 'vs-dark';
+const selectedTheme = ref<string>(initialTheme);
+const saving = ref(false);
+
+const isOwner = computed<boolean>(() => {
+    const userId = (props.user && (props.user as any).id) ? (props.user as any).id : null;
+    return !!(userId && props.snippet.user_id && userId === props.snippet.user_id);
+});
+
+const canEdit = computed<boolean>(() => {
+    return isOwner.value || !!props.snippet.is_guest;
+});
+
+const editTokenKey = computed(() => `edit_token:${props.snippet.hash}`);
+const editToken = ref<string>(localStorage.getItem(editTokenKey.value) || '');
+const needEditToken = computed<boolean>(() => !isOwner.value && !!props.snippet.is_guest);
+
+const monacoLangMap: Record<string, string> = {
+    php: 'php',
+    javascript: 'javascript',
+    typescript: 'typescript',
+    python: 'python',
+    java: 'java',
+    cpp: 'cpp',
+    csharp: 'csharp',
+    html: 'html',
+    css: 'css',
+    sql: 'sql',
+    bash: 'shell',
+    json: 'json',
+    xml: 'xml',
+    markdown: 'markdown',
+    vue: 'html',
+    jsx: 'javascript',
+    tsx: 'typescript',
+    blade: 'php',
+    'php-html': 'php',
+    'php-blade': 'php',
+    'html-css': 'html',
+    'html-js': 'html'
+};
+
+const toMonacoLanguage = (lang: string): string => {
+    const key = (lang || '').toString().toLowerCase();
+    return monacoLangMap[key] || 'plaintext';
+};
+
+const toMonacoTheme = (theme: string): string => {
+    return theme === 'vs-light' ? 'vs' : 'vs-dark';
+};
+
+const initEditor = () => {
+    if (!editorContainer.value) return;
+
+    editorInstance = monaco.editor.create(editorContainer.value, {
+        value: (props.snippet.content as any) ?? '',
+        language: toMonacoLanguage(selectedLanguage.value),
+        theme: toMonacoTheme(selectedTheme.value),
+        automaticLayout: true,
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+    });
+};
+
+const disposeEditor = () => {
+    if (editorInstance) {
+        editorInstance.dispose();
+        editorInstance = null;
+    }
+};
+
+const startEdit = async () => {
+    editMode.value = true;
+    await nextTick();
+    initEditor();
+};
+
+const cancelEdit = () => {
+    editMode.value = false;
+    disposeEditor();
+};
+
+watch(selectedLanguage, (val) => {
+    if (editorInstance) {
+        const model = editorInstance.getModel();
+        if (model) monaco.editor.setModelLanguage(model, toMonacoLanguage(val));
+    }
+});
+
+watch(selectedTheme, (val) => {
+    monaco.editor.setTheme(toMonacoTheme(val));
+});
+
+const saveEdit = async () => {
+    if (!editorInstance) return;
+    if (needEditToken.value && !editToken.value) {
+        showNotification('Нужен токен редактирования', 'error');
+        return;
+    }
+
+    try {
+        saving.value = true;
+        const payload: Record<string, any> = {
+            content: editorInstance.getValue(),
+            language: selectedLanguage.value,
+            theme: selectedTheme.value,
+            is_encrypted: props.snippet.is_encrypted,
+            expires_at: props.snippet.expires_at || undefined,
+        };
+        if (needEditToken.value) {
+            payload.edit_token = editToken.value;
+            // сохраним токен локально
+            localStorage.setItem(editTokenKey.value, editToken.value);
+        }
+
+        const response = await fetch(`/api/snippets/${props.hash}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            try {
+                const data = JSON.parse(text);
+                showNotification(data.message || 'Не удалось сохранить', 'error');
+            } catch {
+                console.error('Ответ не JSON:', text);
+                showNotification('Не удалось сохранить', 'error');
+            }
+            return;
+        }
+
+        showNotification('Сниппет сохранён', 'success');
+        // Перезагрузим страницу, чтобы получить актуальные данные и подсветку
+        window.location.reload();
+    } catch (e) {
+        console.error(e);
+        showNotification('Ошибка сохранения', 'error');
+    } finally {
+        saving.value = false;
+    }
+};
+
+onBeforeUnmount(() => {
+    disposeEditor();
+});
 </script> 

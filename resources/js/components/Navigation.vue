@@ -4,7 +4,7 @@
             <div class="nav-header">
                 <!-- Логотип -->
                 <div class="nav-logo">
-                    <a href="/" class="logo-link">
+                    <Link href="/" class="logo-link">
                         <div class="logo-icon">
                             <svg class="logo-svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -13,7 +13,7 @@
                         <span class="logo-text">
                             CodeTesting.ru
                         </span>
-                    </a>
+                    </Link>
                 </div>
 
                 <!-- Поиск -->
@@ -48,24 +48,24 @@
                 <!-- Центральная навигация -->
                 <div class="nav-menu">
                     <div class="nav-links">
-                        <a href="/" class="nav-link" :class="{ 'nav-link-active': $page.url === '/' }">
+                        <Link href="/" class="nav-link" :class="{ 'nav-link-active': $page.url === '/' }">
                             <svg class="nav-link-icon" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                             </svg>
                             Главная
-                        </a>
-                        <a href="/explore" class="nav-link" :class="{ 'nav-link-active': $page.url === '/explore' }">
+                        </Link>
+                        <Link href="/explore" class="nav-link" :class="{ 'nav-link-active': $page.url === '/explore' }">
                             <svg class="nav-link-icon" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                             </svg>
                             Обзор
-                        </a>
-                        <a href="/my-snippets" class="nav-link" :class="{ 'nav-link-active': $page.url === '/my-snippets' }">
+                        </Link>
+                        <Link href="/my-snippets" class="nav-link" :class="{ 'nav-link-active': $page.url === '/my-snippets' }">
                             <svg class="nav-link-icon" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                             </svg>
                             Мои сниппеты
-                        </a>
+                        </Link>
                     </div>
                 </div>
 
@@ -76,12 +76,12 @@
                     
                     <!-- Кнопки авторизации -->
                     <div v-if="!isAuthenticated" class="auth-buttons">
-                        <a href="/auth" class="auth-link">
+                        <Link href="/auth" class="auth-link">
                             Войти
-                        </a>
-                        <a href="/auth" class="auth-button">
+                        </Link>
+                        <Link href="/auth" class="auth-button">
                             Регистрация
-                        </a>
+                        </Link>
                     </div>
 
                     <!-- Пользовательское меню -->
@@ -149,7 +149,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage, Link } from '@inertiajs/vue3';
 import ThemeToggle from './ThemeToggle.vue';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
 import { ChevronDownIcon, ChartBarIcon, CodeBracketIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';

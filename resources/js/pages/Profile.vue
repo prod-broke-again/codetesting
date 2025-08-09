@@ -152,7 +152,7 @@
                     <div class="section-card">
                         <div class="section-header">
                             <h2 class="section-title">Последние сниппеты</h2>
-                            <a href="/my-snippets" class="section-link">Посмотреть все</a>
+                            <Link href="/my-snippets" class="section-link">Посмотреть все</Link>
                         </div>
                         
                         <div class="snippets-list">
@@ -173,7 +173,7 @@
                             </div>
                             <div v-else class="empty-section">
                                 <p>У вас пока нет сниппетов</p>
-                                <a href="/" class="btn-primary">Создать первый</a>
+                                <Link href="/" class="btn-primary">Создать первый</Link>
                             </div>
                         </div>
                     </div>
@@ -252,6 +252,7 @@ import { router } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
+import { Link } from '@inertiajs/vue3';
 
 // Props от Inertia.js
 interface Props {
