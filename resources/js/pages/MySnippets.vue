@@ -129,6 +129,7 @@ import 'highlight.js/styles/github-dark.css';
 import CodeEditorModal from '@/components/modals/CodeEditorModal.vue';
 import SnippetCard from '@/components/snippets/SnippetCard.vue';
 import { updateSnippet as updateSnippetApi, type UpdateSnippetPayload } from '@/services/snippetService';
+import { useToast } from '@/composables/useToast';
 
 // Props от Inertia.js
 interface Props {
@@ -209,6 +210,7 @@ const modalOpen = ref(false);
 const editingSnippet = ref<any>(null);
 const edit = ref<{ content: string; language: string; theme: string }>({ content: '', language: 'php', theme: 'vs-dark' });
 const saving = ref(false);
+const { show: toast } = useToast();
 
 const openEditor = async (snippet: any) => {
     editingSnippet.value = snippet;
@@ -236,10 +238,11 @@ const saveEdit = async () => {
         await updateSnippetApi(editingSnippet.value.hash, payload as UpdateSnippetPayload);
         // Обновим локально превью
         editingSnippet.value.content = payload.content;
+        toast('Сниппет сохранён', 'success');
         closeEditor();
     } catch (e) {
         console.error(e);
-        alert('Ошибка сохранения');
+        toast('Ошибка сохранения', 'error');
     } finally {
         saving.value = false;
     }

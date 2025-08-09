@@ -19,24 +19,43 @@
       </div>
     </div>
     <div class="snippet-preview">
-      <pre><code class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
+      <pre><code ref="codeEl" class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUpdated } from 'vue';
+import { computed, onMounted, onUpdated, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
-import { hljsLanguageClass as hljsClass, highlightAllIn } from '@/composables/useHighlight';
+import { hljsLanguageClass as hljsClass } from '@/composables/useHighlight';
+import hljs from 'highlight.js';
 
 interface Props { snippet: { hash: string; content: string; language: string; created_at?: string; access_count?: number; privacy?: string } }
 const props = defineProps<Props>();
 
 const languageLabel = computed(() => (LANGUAGE_OPTIONS as any)[props.snippet.language] || props.snippet.language);
 
-onMounted(() => highlightAllIn());
-onUpdated(() => highlightAllIn());
+const codeEl = ref<HTMLElement | null>(null);
+
+onMounted(() => {
+  // Ленивая подсветка
+  const el = codeEl.value;
+  if (!el || !('IntersectionObserver' in window)) return hljs.highlightElement(el as HTMLElement);
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        hljs.highlightElement(el as HTMLElement);
+        io.disconnect();
+      }
+    });
+  }, { rootMargin: '100px' });
+  io.observe(el);
+});
+
+onUpdated(() => {
+  if (codeEl.value) hljs.highlightElement(codeEl.value as HTMLElement);
+});
 </script>
 
 <style scoped>

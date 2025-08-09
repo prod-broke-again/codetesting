@@ -97,6 +97,7 @@ import { Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 import SnippetCard from '@/components/snippets/SnippetCard.vue';
+import ButtonSecondary from '@/components/buttons/ButtonSecondary.vue';
 
 // Props от Inertia.js
 interface Props {

@@ -209,10 +209,10 @@
 
                             <!-- Кнопка создания -->
                             <div class="form-actions">
-                                <button type="submit" class="form-submit" :disabled="isLoading">
+                                <ButtonPrimary type="submit" :disabled="isLoading">
                                     <span v-if="isLoading">Создание...</span>
                                     <span v-else>Создать сниппет</span>
-                                </button>
+                                </ButtonPrimary>
                             </div>
                         </form>
                     </div>
@@ -235,6 +235,8 @@ import Footer from '@/components/Footer.vue';
 import { usePage } from '@inertiajs/vue3';
 import { createSnippet as createSnippetApi } from '@/services/snippetService';
 import { snippetRepository } from '@/repositories/snippetRepository';
+import { useToast } from '@/composables/useToast';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -246,6 +248,7 @@ defineProps<Props>();
 
 const isLoading = ref<boolean>(false);
 let detectionTimeout: number | null = null;
+const { show: toast } = useToast();
 
 const form = reactive<CreateSnippetForm>({
     content: '',
@@ -322,10 +325,11 @@ const createSnippet = async (): Promise<void> => {
         if (snippet.is_guest && snippet.edit_token) {
             snippetRepository.saveGuestToken(snippet.hash, snippet.edit_token);
         }
+        toast('Сниппет создан', 'success');
         window.location.href = `/code/${snippet.hash}`;
     } catch (error) {
         console.error('Ошибка создания сниппета:', error);
-        alert('Ошибка создания сниппета');
+        toast('Ошибка создания сниппета', 'error');
     } finally {
         isLoading.value = false;
     }
