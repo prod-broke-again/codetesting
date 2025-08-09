@@ -115,9 +115,9 @@
                             <div v-for="snippet in recentSnippets" :key="snippet.id" class="snippet-item">
                                 <div class="snippet-info">
                                     <h3 class="snippet-title">
-                                        <a :href="`/code/${snippet.hash}`" class="snippet-link">
+                                        <Link :href="`/code/${snippet.hash}`" class="snippet-link">
                                             {{ snippet.content.substring(0, 30) }}...
-                                        </a>
+                                        </Link>
                                     </h3>
                                     <div class="snippet-meta">
                                         <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
@@ -128,7 +128,7 @@
                         </div>
                         <div v-else class="empty-section">
                             <p>У вас пока нет сниппетов</p>
-                            <Link href="/" class="btn-primary">Создать первый</Link>
+                            <Link href="/"><ButtonPrimary>Создать первый</ButtonPrimary></Link>
                         </div>
                     </div>
                 </div>
@@ -144,9 +144,9 @@
                             <div v-for="snippet in popularSnippets" :key="snippet.id" class="snippet-item">
                                 <div class="snippet-info">
                                     <h3 class="snippet-title">
-                                        <a :href="`/code/${snippet.hash}`" class="snippet-link">
+                                        <Link :href="`/code/${snippet.hash}`" class="snippet-link">
                                             {{ snippet.content.substring(0, 30) }}...
-                                        </a>
+                                        </Link>
                                     </h3>
                                     <div class="snippet-meta">
                                         <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
@@ -174,6 +174,7 @@ import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
 import { Link } from '@inertiajs/vue3';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
 
 // Props от Inertia.js
 interface Props {
