@@ -63,36 +63,18 @@
             <!-- Список сниппетов -->
             <div class="snippets-grid">
                 <div v-if="snippets.data && snippets.data.length > 0" class="snippets-list">
-                    <div v-for="snippet in snippets.data" :key="snippet.id" class="snippet-card">
-                        <div class="snippet-header">
-                            <div class="snippet-info">
-                                <h3 class="snippet-title">
-                                    <Link :href="`/code/${snippet.hash}`" class="snippet-link">
-                                        {{ snippet.content.substring(0, 50) }}...
-                                    </Link>
-                                </h3>
-                                <div class="snippet-meta">
-                                    <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
-                                    <span class="snippet-privacy" :class="`privacy-${snippet.privacy}`">
-                                        {{ getPrivacyLabel(snippet.privacy) }}
-                                    </span>
-                                    <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
-                                    <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
-                                </div>
-                            </div>
-                            <div class="snippet-actions">
-                                <Link :href="`/code/${snippet.hash}`" class="btn-secondary">
-                                    Просмотреть
-                                </Link>
-                                <button @click="openEditor(snippet)" class="btn-primary">
-                                    Редактировать
-                                </button>
-                            </div>
-                        </div>
-                        <div class="snippet-preview">
-                            <pre><code class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
-                        </div>
-                    </div>
+                    <SnippetCard v-for="snippet in snippets.data" :key="snippet.id" :snippet="snippet">
+                        <template #meta>
+                            <span class="snippet-language">{{ LANGUAGE_OPTIONS[snippet.language as keyof typeof LANGUAGE_OPTIONS] || snippet.language }}</span>
+                            <span class="snippet-privacy" :class="`privacy-${snippet.privacy}`">{{ getPrivacyLabel(snippet.privacy) }}</span>
+                            <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
+                            <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
+                        </template>
+                        <template #actions>
+                            <Link :href="`/code/${snippet.hash}`" class="btn-secondary">Просмотреть</Link>
+                            <button @click="openEditor(snippet)" class="btn-primary">Редактировать</button>
+                        </template>
+                    </SnippetCard>
                 </div>
 
                 <!-- Пустое состояние -->
@@ -119,42 +101,24 @@
         <!-- Футер -->
         <Footer />
 
-        <!-- Модальное окно редактора -->
-        <div v-if="modalOpen" class="modal-backdrop" @click.self="closeEditor">
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">Редактирование сниппета</div>
-                    <button class="modal-close" @click="closeEditor">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Язык</label>
-                            <select v-model="edit.language" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-                                <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">{{ label }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">Тема</label>
-                            <select v-model="edit.theme" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 text-sm">
-                                <option value="vs-dark">VS Code Dark</option>
-                                <option value="vs-light">VS Code Light</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div ref="editorContainer" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary" @click="closeEditor">Отмена</button>
-                    <button class="btn-primary" :disabled="saving" @click="saveEdit">Сохранить</button>
-                </div>
-            </div>
-        </div>
+        <CodeEditorModal
+            :open="modalOpen"
+            :value="edit.content"
+            :language="edit.language"
+            :theme="edit.theme"
+            :language-options="LANGUAGE_OPTIONS"
+            :saving="saving"
+            @update:value="(v:string)=> edit.content = v"
+            @update:language="(v:string)=> edit.language = v"
+            @update:theme="(v:string)=> edit.theme = v"
+            @close="closeEditor"
+            @save="saveEdit"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUpdated, nextTick } from 'vue';
+import { ref, onMounted, onUpdated } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { LANGUAGE_OPTIONS } from '@/types';
 import Navigation from '@/components/Navigation.vue';
@@ -162,7 +126,9 @@ import Footer from '@/components/Footer.vue';
 import { Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
-import * as monaco from 'monaco-editor';
+import CodeEditorModal from '@/components/modals/CodeEditorModal.vue';
+import SnippetCard from '@/components/snippets/SnippetCard.vue';
+import { updateSnippet as updateSnippetApi, type UpdateSnippetPayload } from '@/services/snippetService';
 
 // Props от Inertia.js
 interface Props {
@@ -231,14 +197,6 @@ const getPrivacyLabel = (privacy: string) => {
     return labels[privacy] || privacy;
 };
 
-const hljsClass = (lang: string) => {
-    const map: Record<string, string> = {
-        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'xml', css: 'css', sql: 'sql', bash: 'bash', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'vue', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'xml', 'html-js': 'xml'
-    };
-    const key = (lang || '').toString().toLowerCase();
-    return map[key] ? `language-${map[key]}` : '';
-};
-
 const highlight = () => {
     document.querySelectorAll('code.hljs').forEach((el) => hljs.highlightElement(el as HTMLElement));
 };
@@ -248,21 +206,9 @@ onUpdated(highlight);
 
 // ===== Редактор (модалка) =====
 const modalOpen = ref(false);
-const editorContainer = ref<HTMLElement | null>(null);
-let editor: monaco.editor.IStandaloneCodeEditor | null = null;
 const editingSnippet = ref<any>(null);
 const edit = ref<{ content: string; language: string; theme: string }>({ content: '', language: 'php', theme: 'vs-dark' });
 const saving = ref(false);
-
-const toMonacoLanguage = (lang: string) => {
-    const map: Record<string, string> = {
-        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'html', css: 'css', sql: 'sql', bash: 'shell', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'html', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'html', 'html-js': 'html'
-    };
-    const key = (lang || '').toString().toLowerCase();
-    return map[key] || 'plaintext';
-};
-
-const toMonacoTheme = (theme: string) => (theme === 'vs-light' ? 'vs' : 'vs-dark');
 
 const openEditor = async (snippet: any) => {
     editingSnippet.value = snippet;
@@ -272,52 +218,22 @@ const openEditor = async (snippet: any) => {
         theme: snippet.theme === 'vs-light' ? 'vs-light' : 'vs-dark'
     };
     modalOpen.value = true;
-    await nextTick();
-    editor = monaco.editor.create(editorContainer.value as HTMLElement, {
-        value: edit.value.content,
-        language: toMonacoLanguage(edit.value.language),
-        theme: toMonacoTheme(edit.value.theme),
-        automaticLayout: true,
-        minimap: { enabled: false },
-        fontSize: 14,
-        lineNumbers: 'on',
-        scrollBeyondLastLine: false,
-    });
 };
 
 const closeEditor = () => {
-    if (editor) {
-        editor.dispose();
-        editor = null;
-    }
     modalOpen.value = false;
 };
 
 const saveEdit = async () => {
-    if (!editor || !editingSnippet.value) return;
+    if (!editingSnippet.value) return;
     try {
         saving.value = true;
-        const payload: Record<string, any> = {
-            content: editor.getValue(),
+        const payload: UpdateSnippetPayload = {
+            content: edit.value.content,
             language: edit.value.language,
             theme: edit.value.theme,
         };
-        const response = await fetch(`/api/snippets/${editingSnippet.value.hash}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-            const text = await response.text();
-            console.error('Save error:', text);
-            alert('Не удалось сохранить сниппет');
-            return;
-        }
+        await updateSnippetApi(editingSnippet.value.hash, payload as UpdateSnippetPayload);
         // Обновим локально превью
         editingSnippet.value.content = payload.content;
         closeEditor();
@@ -513,29 +429,4 @@ code.snippet-code {
     white-space: pre-wrap;
     overflow: hidden;
 }
-
-/* Модалка */
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 1rem;
-}
-.modal-card {
-    width: 100%;
-    max-width: 960px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    overflow: hidden;
-}
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); }
-.modal-title { font-weight: 600; }
-.modal-close { background: transparent; border: none; font-size: 1.25rem; cursor: pointer; }
-.modal-body { padding: 1rem; }
-.modal-footer { padding: 0.75rem 1rem; display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--color-border); }
 </style> 

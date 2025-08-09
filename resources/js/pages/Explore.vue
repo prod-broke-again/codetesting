@@ -53,30 +53,12 @@
             <!-- Список сниппетов -->
             <div class="snippets-grid">
                 <div v-if="snippets.data && snippets.data.length > 0" class="snippets-list">
-                    <div v-for="snippet in snippets.data" :key="snippet.id" class="snippet-card">
-                        <div class="snippet-header">
-                            <div class="snippet-info">
-                                <h3 class="snippet-title">
-                                    <Link :href="`/code/${snippet.hash}`" class="snippet-link">
-                                        {{ snippet.content.substring(0, 50) }}...
-                                    </Link>
-                                </h3>
-                                <div class="snippet-meta">
-                                    <span class="snippet-language">{{ (LANGUAGE_OPTIONS as any)[snippet.language] || snippet.language }}</span>
-                                    <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
-                                    <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
-                                </div>
-                            </div>
-                            <div class="snippet-actions">
-                                <Link :href="`/code/${snippet.hash}`" class="btn-secondary">
-                                    Просмотреть
-                                </Link>
-                            </div>
-                        </div>
-                        <div class="snippet-preview">
-                            <pre><code class="hljs snippet-code" :class="hljsClass(snippet.language)">{{ snippet.content.substring(0, 200) }}...</code></pre>
-                        </div>
-                    </div>
+                    <SnippetCard v-for="snippet in snippets.data" :key="snippet.id" :snippet="snippet">
+                        <template #meta>
+                            <span class="snippet-date">{{ formatDate(snippet.created_at) }}</span>
+                            <span class="snippet-views">{{ snippet.access_count }} просмотров</span>
+                        </template>
+                    </SnippetCard>
                 </div>
 
                 <!-- Пустое состояние -->
@@ -114,6 +96,7 @@ import Footer from '@/components/Footer.vue';
 import { Link } from '@inertiajs/vue3';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
+import SnippetCard from '@/components/snippets/SnippetCard.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -166,14 +149,6 @@ const formatDate = (dateString: string) => {
         month: 'short',
         day: 'numeric'
     });
-};
-
-const hljsClass = (lang: string) => {
-    const map: Record<string, string> = {
-        php: 'php', javascript: 'javascript', typescript: 'typescript', python: 'python', java: 'java', cpp: 'cpp', csharp: 'csharp', html: 'xml', css: 'css', sql: 'sql', bash: 'bash', json: 'json', xml: 'xml', markdown: 'markdown', vue: 'vue', jsx: 'javascript', tsx: 'typescript', blade: 'php', 'php-html': 'php', 'php-blade': 'php', 'html-css': 'xml', 'html-js': 'xml'
-    };
-    const key = (lang || '').toString().toLowerCase();
-    return map[key] ? `language-${map[key]}` : '';
 };
 
 const highlight = () => {

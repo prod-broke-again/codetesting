@@ -224,6 +224,10 @@ import { onMounted, onUpdated, onBeforeUnmount, ref, computed, watch, nextTick }
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 import * as monaco from 'monaco-editor';
+import { updateSnippet as updateSnippetApi, type UpdateSnippetPayload } from '@/services/snippetService';
+import { snippetRepository } from '@/repositories/snippetRepository';
+import { useToast } from '@/composables/useToast';
+import { useThemeStore } from '@/stores/theme';
 
 // Props от Inertia.js
 interface Props {
@@ -275,63 +279,8 @@ const highlight = () => {
     }
 };
 
-onMounted(() => {
-    highlight();
-});
-
-onUpdated(() => {
-    highlight();
-});
-
-const getLanguageName = (language: string): string => {
-    return (LANGUAGE_OPTIONS as any)[language] || language;
-};
-
-const getThemeName = (theme: string): string => {
-    return (THEME_OPTIONS as any)[theme] || theme;
-};
-
-const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
-const copyCode = async () => {
-    try {
-        await navigator.clipboard.writeText((props.snippet.content as any) ?? '');
-        showNotification('Код скопирован в буфер обмена', 'success');
-    } catch (err) {
-        console.error('Ошибка копирования:', err);
-        showNotification('Ошибка копирования кода', 'error');
-    }
-};
-
-const copyUrl = async () => {
-    try {
-        const url = window.location.href;
-        await navigator.clipboard.writeText(url);
-        showNotification('Ссылка скопирована в буфер обмена', 'success');
-    } catch (err) {
-        console.error('Ошибка копирования ссылки:', err);
-        showNotification('Ошибка копирования ссылки', 'error');
-    }
-};
-
-const showNotification = (message: string, type: 'success' | 'error') => {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ${
-        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-    }`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
-};
+const { show: toast } = useToast();
+const themeStore = useThemeStore();
 
 // ===== Редактирование =====
 const editMode = ref(false);
@@ -352,7 +301,7 @@ const canEdit = computed<boolean>(() => {
 });
 
 const editTokenKey = computed(() => `edit_token:${props.snippet.hash}`);
-const editToken = ref<string>(localStorage.getItem(editTokenKey.value) || '');
+const editToken = ref<string>(snippetRepository.getGuestToken(props.snippet.hash) || '');
 const needEditToken = computed<boolean>(() => !isOwner.value && !!props.snippet.is_guest);
 
 const monacoLangMap: Record<string, string> = {
@@ -388,6 +337,26 @@ const toMonacoLanguage = (lang: string): string => {
 const toMonacoTheme = (theme: string): string => {
     return theme === 'vs-light' ? 'vs' : 'vs-dark';
 };
+
+const applyThemeFromStore = () => {
+    const appTheme = themeStore.currentTheme; // 'light' | 'dark' | 'space' | 'fire'
+    const isDark = appTheme === 'dark' || appTheme === 'space' || appTheme === 'fire';
+    const desired = isDark ? 'vs-dark' : 'vs-light';
+    selectedTheme.value = desired;
+    monaco.editor.setTheme(toMonacoTheme(desired));
+};
+
+onMounted(() => {
+    highlight();
+    applyThemeFromStore();
+});
+
+onUpdated(() => {
+    highlight();
+});
+
+// Следим за сменой темы приложения
+watch(() => themeStore.currentTheme, () => applyThemeFromStore());
 
 const initEditor = () => {
     if (!editorContainer.value) return;
@@ -436,13 +405,13 @@ watch(selectedTheme, (val) => {
 const saveEdit = async () => {
     if (!editorInstance) return;
     if (needEditToken.value && !editToken.value) {
-        showNotification('Нужен токен редактирования', 'error');
+        toast('Нужен токен редактирования', 'error');
         return;
     }
 
     try {
         saving.value = true;
-        const payload: Record<string, any> = {
+        const payload: UpdateSnippetPayload = {
             content: editorInstance.getValue(),
             language: selectedLanguage.value,
             theme: selectedTheme.value,
@@ -450,40 +419,17 @@ const saveEdit = async () => {
             expires_at: props.snippet.expires_at || undefined,
         };
         if (needEditToken.value) {
-            payload.edit_token = editToken.value;
+            (payload as UpdateSnippetPayload).edit_token = editToken.value;
             // сохраним токен локально
             localStorage.setItem(editTokenKey.value, editToken.value);
         }
 
-        const response = await fetch(`/api/snippets/${props.hash}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            try {
-                const data = JSON.parse(text);
-                showNotification(data.message || 'Не удалось сохранить', 'error');
-            } catch {
-                console.error('Ответ не JSON:', text);
-                showNotification('Не удалось сохранить', 'error');
-            }
-            return;
-        }
-
-        showNotification('Сниппет сохранён', 'success');
-        // Перезагрузим страницу, чтобы получить актуальные данные и подсветку
+        await updateSnippetApi(props.hash, payload as UpdateSnippetPayload);
+        toast('Сниппет сохранён', 'success');
         window.location.reload();
     } catch (e) {
         console.error(e);
-        showNotification('Ошибка сохранения', 'error');
+        toast('Ошибка сохранения', 'error');
     } finally {
         saving.value = false;
     }
@@ -492,4 +438,25 @@ const saveEdit = async () => {
 onBeforeUnmount(() => {
     disposeEditor();
 });
+
+async function copyCode() {
+    try {
+        await navigator.clipboard.writeText((props.snippet.content as any) ?? '');
+        toast('Код скопирован в буфер обмена', 'success');
+    } catch (err) {
+        console.error('Ошибка копирования:', err);
+        toast('Ошибка копирования кода', 'error');
+    }
+}
+
+async function copyUrl() {
+    try {
+        const url = window.location.href;
+        await navigator.clipboard.writeText(url);
+        toast('Ссылка скопирована в буфер обмена', 'success');
+    } catch (err) {
+        console.error('Ошибка копирования ссылки:', err);
+        toast('Ошибка копирования ссылки', 'error');
+    }
+}
 </script> 

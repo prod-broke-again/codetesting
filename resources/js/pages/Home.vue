@@ -233,6 +233,8 @@ import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from 
 import Navigation from '@/components/Navigation.vue';
 import Footer from '@/components/Footer.vue';
 import { usePage } from '@inertiajs/vue3';
+import { createSnippet as createSnippetApi } from '@/services/snippetService';
+import { snippetRepository } from '@/repositories/snippetRepository';
 
 // Props от Inertia.js
 interface Props {
@@ -240,7 +242,7 @@ interface Props {
     description: string;
     user?: any;
 }
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const isLoading = ref<boolean>(false);
 let detectionTimeout: number | null = null;
@@ -316,45 +318,14 @@ const createSnippet = async (): Promise<void> => {
         const isAuthenticated = !!page.props.user;
         const url = isAuthenticated ? '/snippets' : '/api/snippets';
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                'X-Fingerprint': localStorage.getItem('fingerprint') || ''
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            const contentType = response.headers.get('Content-Type') || '';
-            if (contentType.includes('application/json')) {
-                const data = await response.json();
-                // Если гость получил edit_token — сохраним для будущего редактирования
-                const snippet = data?.data;
-                if (snippet?.is_guest && snippet?.edit_token && snippet?.hash) {
-                    localStorage.setItem(`edit_token:${snippet.hash}`, snippet.edit_token);
-                }
-                window.location.href = `/code/${snippet.hash}`;
-            } else {
-                // Если это не JSON (возможно редирект HTML), используем конечный URL
-                window.location.href = response.url;
-            }
-        } else {
-            const text = await response.text();
-            try {
-                const err = JSON.parse(text);
-                alert(err.message || 'Ошибка создания сниппета');
-            } catch (e) {
-                console.error('Ответ не JSON:', text);
-                alert('Ошибка создания сниппета');
-            }
+        const snippet = await createSnippetApi(payload, url);
+        if (snippet.is_guest && snippet.edit_token) {
+            snippetRepository.saveGuestToken(snippet.hash, snippet.edit_token);
         }
+        window.location.href = `/code/${snippet.hash}`;
     } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Ошибка соединения с сервером');
+        console.error('Ошибка создания сниппета:', error);
+        alert('Ошибка создания сниппета');
     } finally {
         isLoading.value = false;
     }
@@ -584,12 +555,7 @@ const createSnippet = async (): Promise<void> => {
     line-height: 1.5;
 }
 
-.form-textarea:focus {
-    outline: none;
-    ring: 2px;
-    ring-color: var(--color-primary);
-    border-color: transparent;
-}
+.form-textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
 .form-textarea::placeholder {
     color: var(--color-textSecondary);
@@ -658,12 +624,7 @@ const createSnippet = async (): Promise<void> => {
     font-size: 0.875rem;
 }
 
-.form-select:focus, .form-input:focus {
-    outline: none;
-    ring: 2px;
-    ring-color: var(--color-primary);
-    border-color: transparent;
-}
+.form-select:focus, .form-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
 .form-checkbox-label {
     display: flex;
