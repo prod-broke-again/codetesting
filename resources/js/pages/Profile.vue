@@ -108,7 +108,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="empty-section"><p>У вас пока нет сниппетов</p><Link href="/" class="btn-primary">Создать первый</Link></div>
+                            <div v-else class="empty-section"><p>У вас пока нет сниппетов</p><Link href="/"><ButtonPrimary>Создать первый</ButtonPrimary></Link></div>
                         </div>
                     </div>
                 </div>
@@ -471,52 +471,6 @@ const formatDate = (dateString: string) => new Date(dateString).toLocaleDateStri
     display: flex;
     justify-content: flex-end;
     margin-top: 1rem;
-}
-
-.btn-primary, .btn-secondary, .btn-danger {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: var(--gradient-primary);
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-secondary {
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover {
-    background-color: var(--color-border);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .snippets-list {
