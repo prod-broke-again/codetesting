@@ -67,9 +67,7 @@
                     <div class="form-header">
                         <div class="form-header-content">
                             <div class="form-header-icon">
-                                <svg class="form-header-svg" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
+                                <svg class="form-header-svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
                             </div>
                             <div>
                                 <h2 class="form-header-title">Создать новый сниппет</h2>
@@ -81,128 +79,37 @@
                     <!-- Содержимое формы -->
                     <div class="form-body">
                         <form @submit.prevent="createSnippet" class="form">
-                            <!-- Поле для кода -->
                             <div class="form-field">
-                                <label for="code" class="form-label">
-                                    Ваш код
-                                </label>
-                                <div class="form-input-container">
-                                    <textarea
-                                        id="code"
-                                        v-model="form.content"
-                                        @input="onCodeInput"
-                                        rows="12"
-                                        class="form-textarea"
-                                        placeholder="Вставьте ваш код здесь..."
-                                        required
-                                    ></textarea>
-                                    
-                                    <!-- Индикатор определения языка -->
-                                    <div class="language-indicator">
-                                        <div class="language-info">
-                                            <span class="language-label">Определенный язык:</span>
-                                            <span class="language-value">{{ detectedLanguage }}</span>
-                                        </div>
-                                        <div class="confidence-info">
-                                            <span class="confidence-label">Уверенность:</span>
-                                            <span class="confidence-value">{{ confidence }}%</span>
-                                        </div>
-                                    </div>
+                                <TextareaInput id="code" v-model="form.content" label="Ваш код" :rows="12" placeholder="Вставьте ваш код здесь..." required />
+                                <div class="language-indicator">
+                                    <div class="language-info"><span class="language-label">Определенный язык:</span><span class="language-value">{{ detectedLanguage }}</span></div>
+                                    <div class="confidence-info"><span class="confidence-label">Уверенность:</span><span class="confidence-value">{{ confidence }}%</span></div>
                                 </div>
                             </div>
 
-                            <!-- Настройки сниппета -->
                             <div class="form-settings">
                                 <div class="form-row">
-                                    <!-- Выбор языка -->
                                     <div class="form-field-half">
-                                        <label for="language" class="form-label">Язык программирования</label>
-                                        <select
-                                            id="language"
-                                            v-model="form.language"
-                                            class="form-select"
-                                            required
-                                        >
-                                            <option value="">Автоопределение</option>
-                                            <option v-for="(label, value) in LANGUAGE_OPTIONS" :key="value" :value="value">
-                                                {{ label }}
-                                            </option>
-                                        </select>
+                                        <SelectInput id="language" v-model="form.language" :options="languageOptions" label="Язык программирования" placeholder="Автоопределение" />
                                     </div>
-
-                                    <!-- Выбор темы -->
                                     <div class="form-field-half">
-                                        <label for="theme" class="form-label">Тема подсветки</label>
-                                        <select
-                                            id="theme"
-                                            v-model="form.theme"
-                                            class="form-select"
-                                            required
-                                        >
-                                            <option v-for="(label, value) in THEME_OPTIONS" :key="value" :value="value">
-                                                {{ label }}
-                                            </option>
-                                        </select>
+                                        <SelectInput id="theme" v-model="form.theme" :options="themeOptions" label="Тема подсветки" />
                                     </div>
                                 </div>
-
                                 <div class="form-row">
-                                    <!-- Приватность -->
                                     <div class="form-field-half">
-                                        <label for="privacy" class="form-label">Приватность</label>
-                                        <select
-                                            id="privacy"
-                                            v-model="form.privacy"
-                                            class="form-select"
-                                            required
-                                        >
-                                            <option value="private">🔒 Приватный (доступ по паролю)</option>
-                                            <option value="unlisted">🔗 По ссылке (не в поиске)</option>
-                                            <option value="public">🌐 Публичный (как GitHub)</option>
-                                        </select>
+                                        <SelectInput id="privacy" v-model="form.privacy" :options="privacyOptions" label="Приватность" />
                                     </div>
-
-                                    <!-- Время жизни -->
                                     <div class="form-field-half">
-                                        <label for="expires_at" class="form-label">Время жизни</label>
-                                        <select
-                                            id="expires_at"
-                                            v-model="form.expires_at"
-                                            class="form-select"
-                                        >
-                                            <option value="">Без ограничений</option>
-                                            <option value="1h">1 час</option>
-                                            <option value="24h">24 часа</option>
-                                            <option value="7d">7 дней</option>
-                                            <option value="30d">30 дней</option>
-                                        </select>
+                                        <SelectInput id="expires_at" v-model="form.expires_at" :options="expiresOptions" label="Время жизни" />
                                     </div>
                                 </div>
-
                                 <div class="form-row">
-                                    <!-- Шифрование -->
                                     <div class="form-field-half">
-                                        <label class="form-checkbox-label">
-                                            <input
-                                                type="checkbox"
-                                                v-model="form.is_encrypted"
-                                                class="form-checkbox"
-                                            />
-                                            <span class="form-checkbox-text">Зашифровать сниппет</span>
-                                        </label>
+                                        <CheckboxInput v-model="form.is_encrypted" label="Зашифровать сниппет" />
                                     </div>
-
-                                    <!-- Пароль (если приватный) -->
                                     <div class="form-field-half" v-if="form.privacy === 'private'">
-                                        <label for="password" class="form-label">Пароль доступа</label>
-                                        <input
-                                            type="password"
-                                            id="password"
-                                            v-model="form.password"
-                                            class="form-input"
-                                            placeholder="Введите пароль"
-                                            required
-                                        />
+                                        <TextInput id="password" v-model="form.password" type="password" label="Пароль доступа" placeholder="Введите пароль" />
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { computed, ref, reactive } from 'vue';
 import type { CreateSnippetForm, ProgrammingLanguage, CodeTheme } from '@/types';
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from '@/types';
 import { detectLanguage, getDetectionConfidence, getAlternativeLanguages } from '@/utils/languageDetector';
@@ -237,6 +144,10 @@ import { createSnippet as createSnippetApi } from '@/services/snippetService';
 import { snippetRepository } from '@/repositories/snippetRepository';
 import { useToast } from '@/composables/useToast';
 import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
+import TextareaInput from '@/components/inputs/TextareaInput.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -334,6 +245,22 @@ const createSnippet = async (): Promise<void> => {
         isLoading.value = false;
     }
 };
+
+// маппинги для SelectInput
+const languageOptions = computed(() => Object.entries(LANGUAGE_OPTIONS).map(([value, label]) => ({ value, label })));
+const themeOptions = computed(() => Object.entries(THEME_OPTIONS).map(([value, label]) => ({ value, label })));
+const privacyOptions = [
+  { value: 'private', label: '🔒 Приватный (доступ по паролю)' },
+  { value: 'unlisted', label: '🔗 По ссылке (не в поиске)' },
+  { value: 'public', label: '🌐 Публичный (как GitHub)' },
+];
+const expiresOptions = [
+  { value: '', label: 'Без ограничений' },
+  { value: '1h', label: '1 час' },
+  { value: '24h', label: '24 часа' },
+  { value: '7d', label: '7 дней' },
+  { value: '30d', label: '30 дней' },
+];
 </script>
 
 <style scoped>
