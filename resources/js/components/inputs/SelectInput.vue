@@ -4,6 +4,9 @@
     <select
       :id="id"
       :disabled="disabled"
+      :required="required"
+      :aria-invalid="error ? 'true' : 'false'"
+      :aria-describedby="error ? `${id}-error` : undefined"
       :value="modelValue"
       @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
       class="block w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-60 disabled:cursor-not-allowed"
@@ -11,7 +14,7 @@
       <option v-if="placeholder" value="">{{ placeholder }}</option>
       <option v-for="opt in normalizedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
     </select>
-    <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
+    <p v-if="error" :id="`${id}-error`" class="mt-1 text-sm text-red-600">{{ error }}</p>
   </div>
 </template>
 
@@ -29,10 +32,11 @@ interface Props {
   options: Options;
   placeholder?: string;
   disabled?: boolean;
+  required?: boolean;
   error?: string;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { disabled: false, required: false });
 
 const normalizedOptions = computed<Option[]>(() => {
   if (Array.isArray(props.options)) return props.options;
