@@ -418,8 +418,6 @@ const saveEdit = async () => {
 .btn-primary { background: var(--gradient-primary); color: white; }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 
-.snippet-preview { background-color: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border); overflow: hidden; }
-
 /* Стили теперь применяются к code.snippet-code, а не к pre */
 code.snippet-code {
     display: block;

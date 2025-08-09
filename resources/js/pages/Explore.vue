@@ -70,7 +70,7 @@
                     <p class="empty-description">
                         Попробуйте изменить фильтры или создать первый сниппет
                     </p>
-                    <Link href="/" class="btn-primary">Создать сниппет</Link>
+                    <Link href="/"><ButtonPrimary>Создать сниппет</ButtonPrimary></Link>
                 </div>
             </div>
 
@@ -96,6 +96,7 @@ import 'highlight.js/styles/github-dark.css';
 import SnippetCard from '@/components/snippets/SnippetCard.vue';
 import TextInput from '@/components/inputs/TextInput.vue';
 import SelectInput from '@/components/inputs/SelectInput.vue';
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
 
 // Props от Inertia.js
 interface Props {
@@ -322,13 +323,6 @@ onUpdated(highlight);
 
 .btn-secondary:hover {
     background-color: var(--color-border);
-}
-
-.snippet-preview {
-    background-color: var(--color-surface);
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    overflow: hidden;
 }
 
 /* Стили теперь применяются к code.snippet-code, а не к pre */

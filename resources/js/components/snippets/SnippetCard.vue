@@ -66,6 +66,6 @@ onUpdated(() => {
 .snippet-link:hover { text-decoration: underline; }
 .snippet-meta { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-textSecondary); flex-wrap: wrap; }
 .snippet-actions { display: flex; gap: 0.5rem; }
-.snippet-preview { background-color: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border); overflow: hidden; }
+/* .snippet-preview — глобальный класс в resources/css/app.css */
 code.snippet-code { display: block; font-family: 'Monaco','Menlo','Ubuntu Mono',monospace; font-size: 0.875rem; line-height: 1.5; color: var(--color-textSecondary); white-space: pre-wrap; overflow: hidden; }
 </style>
