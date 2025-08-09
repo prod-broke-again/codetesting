@@ -220,6 +220,16 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+// Хелперы отображения
+const getLanguageName = (lang: string | unknown): string => {
+  const key = (lang as any)?.toString?.() ?? '';
+  return (LANGUAGE_OPTIONS as any)[key] || key;
+};
+const getThemeName = (theme: string | unknown): string => {
+  const key = (theme as any)?.toString?.() ?? '';
+  return (THEME_OPTIONS as any)[key] || key;
+};
+
 const codeEl = ref<HTMLElement | null>(null);
 
 const editorThemeOptions = computed(() => [
