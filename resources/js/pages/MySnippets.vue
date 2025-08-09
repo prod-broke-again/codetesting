@@ -248,184 +248,37 @@ const saveEdit = async () => {
 </script>
 
 <style scoped>
-.my-snippets-container {
-    min-height: 100vh;
-    background: var(--gradient-background);
-    display: flex;
-    flex-direction: column;
-}
+.my-snippets-container { min-height: 100vh; background: var(--gradient-background); display: flex; flex-direction: column; }
+.my-snippets-content { max-width: 80rem; margin: 0 auto; padding: 0 1rem; padding-top: 3rem; padding-bottom: 3rem; flex: 1; }
+@media (min-width: 640px) { .my-snippets-content { padding: 0 1.5rem; } }
+@media (min-width: 1024px) { .my-snippets-content { padding: 0 2rem; } }
+.my-snippets-header { text-align: center; margin-bottom: 3rem; }
+.my-snippets-title { font-size: 3rem; font-weight: 700; margin-bottom: 1.5rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+@media (min-width: 768px) { .my-snippets-title { font-size: 3.75rem; } }
+.my-snippets-description { font-size: 1.25rem; color: var(--color-textSecondary); max-width: 48rem; margin: 0 auto; line-height: 1.6; }
 
-.my-snippets-content {
-    max-width: 80rem;
-    margin: 0 auto;
-    padding: 0 1rem;
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-    flex: 1;
-}
+.filters-section { margin-bottom: 2rem; }
+.filters-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 768px) { .filters-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+/* Поля фильтров теперь общими компонентами */
 
-@media (min-width: 640px) {
-    .my-snippets-content {
-        padding: 0 1.5rem;
-    }
-}
+.snippets-grid { margin-bottom: 2rem; }
+.snippets-list { display: flex; flex-direction: column; gap: 1.5rem; }
 
-@media (min-width: 1024px) {
-    .my-snippets-content {
-        padding: 0 2rem;
-    }
-}
-
-.my-snippets-header {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-
-.my-snippets-title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-@media (min-width: 768px) {
-    .my-snippets-title {
-        font-size: 3.75rem;
-    }
-}
-
-.my-snippets-description {
-    font-size: 1.25rem;
-    color: var(--color-textSecondary);
-    max-width: 48rem;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-.filters-section {
-    margin-bottom: 2rem;
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-
-@media (min-width: 768px) {
-    .filters-grid {
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-    }
-}
-
-.filter-input, .filter-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    font-size: 0.875rem;
-}
-
-.filter-input:focus, .filter-select:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.snippets-grid {
-    margin-bottom: 2rem;
-}
-
-.snippets-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.snippet-card {
-    background-color: var(--color-surface);
-    backdrop-filter: blur(12px);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid var(--color-border);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.snippet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-}
-
-.snippet-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 0.5rem;
-}
-
-.snippet-link {
-    color: var(--color-primary);
-    text-decoration: none;
-}
-
-.snippet-link:hover {
-    text-decoration: underline;
-}
-
-.snippet-meta {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: var(--color-textSecondary);
-    flex-wrap: wrap;
-}
-
-.snippet-privacy {
-    font-weight: 500;
-}
-
+.snippet-card { background-color: var(--color-surface); backdrop-filter: blur(12px); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--color-border); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+.snippet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.snippet-title { font-size: 1.125rem; font-weight: 600; color: var(--color-text); margin-bottom: 0.5rem; }
+.snippet-link { color: var(--color-primary); text-decoration: none; }
+.snippet-link:hover { text-decoration: underline; }
+.snippet-meta { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-textSecondary); flex-wrap: wrap; }
+.snippet-privacy { font-weight: 500; }
 .privacy-private { color: var(--color-warning); }
 .privacy-unlisted { color: var(--color-info); }
 .privacy-public { color: var(--color-success); }
-
 .snippet-actions { display: flex; gap: 0.5rem; }
 
-.btn-secondary, .btn-primary {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-}
+/* Глобальный .snippet-preview используется */
 
-.btn-secondary {
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover { background-color: var(--color-border); }
-
-.btn-primary { background: var(--gradient-primary); color: white; }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-
-/* Стили теперь применяются к code.snippet-code, а не к pre */
-code.snippet-code {
-    display: block;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--color-textSecondary);
-    white-space: pre-wrap;
-    overflow: hidden;
-}
+/* Просмотр кода */
+code.snippet-code { display: block; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 0.875rem; line-height: 1.5; color: var(--color-textSecondary); white-space: pre-wrap; overflow: hidden; }
 </style> 
