@@ -116,7 +116,7 @@
 
                             <!-- Кнопка создания -->
                             <div class="form-actions">
-                                <ButtonPrimary type="submit" :disabled="isLoading">
+                                <ButtonPrimary type="submit" :disabled="isLoading" :busy="isLoading">
                                     <span v-if="isLoading">Создание...</span>
                                     <span v-else>Создать сниппет</span>
                                 </ButtonPrimary>

@@ -95,7 +95,12 @@
             @update:theme="(v:string)=> edit.theme = v"
             @close="closeEditor"
             @save="saveEdit"
-        />
+        >
+            <div class="flex items-center justify-end space-x-3">
+                <ButtonSecondary type="button" @click="closeEditor">Отмена</ButtonSecondary>
+                <ButtonPrimary type="button" @click="saveEdit" :disabled="saving" :busy="saving">{{ saving ? 'Сохранение...' : 'Сохранить' }}</ButtonPrimary>
+            </div>
+        </CodeEditorModal>
     </div>
 </template>
 

@@ -152,7 +152,7 @@
                             <div ref="editorContainer" class="h-96 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"></div>
                             <div class="flex items-center justify-end space-x-3">
                                 <ButtonSecondary type="button" @click="cancelEdit">Отмена</ButtonSecondary>
-                                <ButtonPrimary type="button" @click="saveEdit" :disabled="saving">{{ saving ? 'Сохранение...' : 'Сохранить' }}</ButtonPrimary>
+                                <ButtonPrimary type="button" @click="saveEdit" :disabled="saving" :busy="saving">{{ saving ? 'Сохранение...' : 'Сохранить' }}</ButtonPrimary>
                             </div>
                         </div>
                     </div>

@@ -86,7 +86,7 @@
                             <div class="form-group"><TextInput id="current_password" v-model="form.current_password" label="Текущий пароль" type="password" /></div>
                             <div class="form-group"><TextInput id="new_password" v-model="form.new_password" label="Новый пароль" type="password" /></div>
                             <div class="form-group"><TextInput id="new_password_confirmation" v-model="form.new_password_confirmation" label="Подтверждение пароля" type="password" /></div>
-                            <div class="form-actions"><ButtonPrimary type="submit" :disabled="isLoading">{{ isLoading ? 'Сохранение...' : 'Сохранить изменения' }}</ButtonPrimary></div>
+                            <div class="form-actions"><ButtonPrimary type="submit" :disabled="isLoading" :busy="isLoading">{{ isLoading ? 'Сохранение...' : 'Сохранить изменения' }}</ButtonPrimary></div>
                         </form>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                     
                     <form @submit.prevent="deleteAccount" class="delete-form">
                         <div class="form-group"><TextInput id="delete_password" v-model="deleteForm.password" type="password" label="Введите пароль для подтверждения" required /></div>
-                        <div class="modal-actions"><ButtonSecondary type="button" @click="showDeleteModal = false">Отмена</ButtonSecondary><ButtonPrimary type="submit" :disabled="isDeleting">{{ isDeleting ? 'Удаление...' : 'Удалить аккаунт' }}</ButtonPrimary></div>
+                        <div class="modal-actions"><ButtonSecondary type="button" @click="showDeleteModal = false">Отмена</ButtonSecondary><ButtonPrimary type="submit" :disabled="isDeleting" :busy="isDeleting">{{ isDeleting ? 'Удаление...' : 'Удалить аккаунт' }}</ButtonPrimary></div>
                     </form>
                 </div>
             </div>

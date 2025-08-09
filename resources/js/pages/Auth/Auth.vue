@@ -91,7 +91,7 @@
 
                     <!-- Кнопка отправки -->
                     <div>
-                        <ButtonPrimary type="submit" :disabled="isLoading" class="w-full">{{ isLoading ? (isLoginMode ? 'Вход...' : 'Регистрация...') : (isLoginMode ? 'Войти' : 'Зарегистрироваться') }}</ButtonPrimary>
+                        <ButtonPrimary type="submit" :disabled="isLoading" :busy="isLoading" class="w-full">{{ isLoading ? (isLoginMode ? 'Вход...' : 'Регистрация...') : (isLoginMode ? 'Войти' : 'Зарегистрироваться') }}</ButtonPrimary>
                     </div>
                 </form>
 
